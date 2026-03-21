@@ -1,0 +1,379 @@
+@import "tailwindcss";
+
+/* ── Landing page animations ── */
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes floatY {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+@keyframes shimmer {
+  from { background-position: -200% center; }
+  to   { background-position:  200% center; }
+}
+@keyframes pulseSlow {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+@keyframes bounceY {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%       { transform: translateX(-50%) translateY(8px); }
+}
+@keyframes navSlideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(16,185,129,0.2); }
+  50%       { box-shadow: 0 0 40px rgba(16,185,129,0.4); }
+}
+
+.animate-float        { animation: floatY 4s ease-in-out infinite; }
+.animate-shimmer      { background-size: 200% auto; animation: shimmer 3s linear infinite; }
+.animate-pulse-slow   { animation: pulseSlow 3s ease-in-out infinite; }
+.animate-gradient     { background-size: 200% 200%; animation: gradientShift 4s ease infinite; }
+.animate-glow-pulse   { animation: glowPulse 3s ease-in-out infinite; }
+.animate-nav-slide    { animation: navSlideIn 0.2s ease-out forwards; }
+
+/* ── MonthPicker portal dropdown animation ── */
+@keyframes dropdown-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+.animate-in {
+  animation: dropdown-in 0.13s ease-out forwards;
+}
+
+/* ── Global resize cursor enforcement ── */
+body.col-resizing,
+body.col-resizing * {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+/* ── Thin custom scrollbars ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ── Number input spinners ── */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Sidebar range sliders  —  fully styled, draggable everywhere
+   Uses CSS custom properties set inline by the SliderBlock component:
+     --thumb-color  : accent colour
+     --fill-pct     : percentage fill width
+   ═══════════════════════════════════════════════════════════════ */
+
+input.sidebar-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 9999px;
+  outline: none;
+  cursor: pointer;
+
+  /* Gradient: filled portion (left) vs track (right) */
+  background: linear-gradient(
+    to right,
+    var(--thumb-color, #3b82f6) 0%,
+    var(--thumb-color, #3b82f6) var(--fill-pct, 50%),
+    #e5e7eb var(--fill-pct, 50%),
+    #e5e7eb 100%
+  );
+}
+
+/* WebKit thumb */
+input.sidebar-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--thumb-color, #3b82f6);
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  cursor: grab;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+input.sidebar-range::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Firefox thumb */
+input.sidebar-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--thumb-color, #3b82f6);
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  cursor: grab;
+}
+input.sidebar-range::-moz-range-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.2);
+}
+
+/* Firefox track fill */
+input.sidebar-range::-moz-range-progress {
+  background: var(--thumb-color, #3b82f6);
+  height: 6px;
+  border-radius: 9999px;
+}
+
+input.sidebar-range::-moz-range-track {
+  background: #e5e7eb;
+  height: 6px;
+  border-radius: 9999px;
+}
+
+/* Focus ring */
+input.sidebar-range:focus-visible {
+  outline: 2px solid var(--thumb-color, #3b82f6);
+  outline-offset: 2px;
+}
+
+/* ══════════════════════════════════════════════════
+   CSS custom properties — builder UI theming
+   These are set on :root and overridden under .dark
+   so every component can use var(--ui-*) tokens
+═══════════════════════════════════════════════════ */
+:root {
+  --ui-bg:          #f8fafc;
+  --ui-surface:     #ffffff;
+  --ui-surface2:    #f1f5f9;
+  --ui-border:      #e5e7eb;
+  --ui-border2:     #d1d5db;
+  --ui-text:        #111827;
+  --ui-text2:       #374151;
+  --ui-muted:       #6b7280;
+  --ui-placeholder: #9ca3af;
+  --ui-input-bg:    #ffffff;
+  --ui-card:        #ffffff;
+  --ui-card2:       #f9fafb;
+  --ui-accent:      #10b981;
+  --ui-accent2:     #059669;
+  --ui-focus:       rgba(16,185,129,0.35);
+}
+.dark {
+  --ui-bg:          #0a0f1a;
+  --ui-surface:     #111827;
+  --ui-surface2:    #1a2234;
+  --ui-border:      rgba(52,211,153,0.10);
+  --ui-border2:     #2d3748;
+  --ui-text:        #f0f4f8;
+  --ui-text2:       #c9d1d9;
+  --ui-muted:       #8b949e;
+  --ui-placeholder: #4a5568;
+  --ui-input-bg:    #1a2234;
+  --ui-card:        #161e2e;
+  --ui-card2:       #1a2234;
+  --ui-accent:      #10b981;
+  --ui-accent2:     #34d399;
+  --ui-focus:       rgba(52,211,153,0.35);
+}
+
+/* ── Apply CSS vars to common builder elements ── */
+.builder-ui input:not([type=range]):not([type=checkbox]),
+.builder-ui textarea,
+.builder-ui select {
+  background: var(--ui-input-bg) !important;
+  color: var(--ui-text) !important;
+  border-color: var(--ui-border2) !important;
+}
+.builder-ui input::placeholder,
+.builder-ui textarea::placeholder {
+  color: var(--ui-placeholder) !important;
+}
+.builder-ui label {
+  color: var(--ui-muted) !important;
+}
+.builder-ui .card {
+  background: var(--ui-card) !important;
+  border-color: var(--ui-border) !important;
+}
+.builder-ui .card2 {
+  background: var(--ui-card2) !important;
+  border-color: var(--ui-border) !important;
+}
+.builder-ui p, .builder-ui span:not(.no-theme) {
+  color: inherit;
+}
+
+/* ══ DARK MODE — comprehensive builder UI overrides ══ */
+
+/* All white/light backgrounds → dark surfaces */
+.dark .builder-ui [class*="bg-white"],
+.dark .builder-ui [class*="bg-gray-50"],
+.dark .builder-ui [class*="bg-gray-100"],
+.dark .builder-ui [class*="bg-slate-50"] {
+  background-color: var(--ui-card) !important;
+}
+.dark .builder-ui [class*="bg-gray-200"] {
+  background-color: var(--ui-surface2) !important;
+}
+
+/* All dark text on light bg → light text */
+.dark .builder-ui [class*="text-gray-900"],
+.dark .builder-ui [class*="text-gray-800"],
+.dark .builder-ui [class*="text-gray-700"],
+.dark .builder-ui [class*="text-slate-900"],
+.dark .builder-ui [class*="text-slate-800"] {
+  color: var(--ui-text) !important;
+}
+.dark .builder-ui [class*="text-gray-600"],
+.dark .builder-ui [class*="text-gray-500"],
+.dark .builder-ui [class*="text-slate-600"],
+.dark .builder-ui [class*="text-slate-500"] {
+  color: var(--ui-muted) !important;
+}
+
+/* Borders */
+.dark .builder-ui [class*="border-gray-200"],
+.dark .builder-ui [class*="border-gray-100"],
+.dark .builder-ui [class*="border-slate-200"] {
+  border-color: var(--ui-border) !important;
+}
+.dark .builder-ui [class*="border-gray-300"],
+.dark .builder-ui [class*="border-gray-400"] {
+  border-color: var(--ui-border2) !important;
+}
+
+/* Skill chips — keep bg-white chips readable in dark */
+.dark .builder-ui .skill-chip {
+  background: var(--ui-card2) !important;
+  border-color: var(--ui-border2) !important;
+}
+.dark .builder-ui .skill-chip input {
+  color: var(--ui-text) !important;
+  background: transparent !important;
+}
+
+/* Category section backgrounds in dark */
+.dark .builder-ui .cat-technical { background: rgba(59,130,246,0.12) !important; }
+.dark .builder-ui .cat-soft      { background: rgba(245,158,11,0.12) !important; }
+.dark .builder-ui .cat-tools     { background: rgba(139,92,246,0.12) !important; }
+.dark .builder-ui .cat-other     { background: rgba(100,116,139,0.12) !important; }
+
+/* Skill level badges — preserve colors in dark mode */
+.dark .builder-ui .level-beginner     { background: rgba(100,116,139,0.25) !important; color: #94a3b8 !important; }
+.dark .builder-ui .level-intermediate { background: rgba(59,130,246,0.25)  !important; color: #93c5fd !important; }
+.dark .builder-ui .level-advanced     { background: rgba(139,92,246,0.25)  !important; color: #c4b5fd !important; }
+.dark .builder-ui .level-expert       { background: rgba(16,185,129,0.25)  !important; color: #6ee7b7 !important; }
+
+/* Section/card headers */
+.dark .builder-ui [class*="rounded-xl"][class*="p-4"],
+.dark .builder-ui [class*="rounded-xl"][class*="p-3"] {
+  background: var(--ui-card) !important;
+  border-color: var(--ui-border) !important;
+}
+
+/* Editor section collapsed cards */
+.dark .builder-ui [class*="shadow-sm"] {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4) !important;
+}
+
+/* Hover states on items */
+.dark .builder-ui [class*="hover:bg-gray-50"]:hover {
+  background: var(--ui-surface2) !important;
+}
+.dark .builder-ui [class*="hover:bg-gray-100"]:hover {
+  background: var(--ui-surface2) !important;
+}
+
+/* Dividers */
+.dark .builder-ui [class*="divide-gray"] > * + * {
+  border-color: var(--ui-border) !important;
+}
+
+/* Empty state text */
+.dark .builder-ui [class*="text-gray-400"] {
+  color: #4b5563 !important;
+}
+.dark .builder-ui [class*="text-gray-300"] {
+  color: #374151 !important;
+}
+
+/* Buttons with light backgrounds */
+.dark .builder-ui button[class*="bg-gray"] {
+  background: var(--ui-surface2) !important;
+  color: var(--ui-text) !important;
+}
+
+/* Preview panel toolbar */
+.dark .preview-toolbar {
+  background: var(--ui-surface) !important;
+  border-color: var(--ui-border) !important;
+}
+
+/* Editor panel header */
+.dark .editor-header {
+  background: var(--ui-surface) !important;
+  border-color: var(--ui-border) !important;
+}
+
+/* Dark sidebar tabs */
+.dark .sidebar-tab-active {
+  background: rgba(16,185,129,0.15) !important;
+  color: #34d399 !important;
+  border-color: #10b981 !important;
+}
+.dark .sidebar-tab-inactive {
+  color: #64748b !important;
+}
+.dark .sidebar-tab-inactive:hover {
+  background: rgba(255,255,255,0.05) !important;
+  color: #94a3b8 !important;
+}
+
+/* ── Dark mode slider track ── */
+.dark input.sidebar-range {
+  background: linear-gradient(
+    to right,
+    var(--thumb-color, #10b981) 0%,
+    var(--thumb-color, #10b981) var(--fill-pct, 50%),
+    #334155 var(--fill-pct, 50%),
+    #334155 100%
+  );
+}
+.dark input.sidebar-range::-moz-range-track { background: #334155; }
+
+/* ── Dark mode scrollbars ── */
+.dark ::-webkit-scrollbar-thumb { background: #475569; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+/* ── Print styles (fallback — not used for PDF) ── */
+@media print {
+  body * { visibility: hidden !important; }
+  #resume-print-root,
+  #resume-print-root * { visibility: visible !important; }
+  #resume-print-root {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 99999 !important;
+  }
+}
