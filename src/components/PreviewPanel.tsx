@@ -466,36 +466,101 @@ export default function PreviewPanel() {
   );
 
   /* ── AI Banner for LaTeX ── */
-  const AIBanner = () => (
+const AIBanner = () => {
+  // Detect light/dark from CSS variable or use a simple check
+  const isDarkMode = document.documentElement.classList.contains('dark') ||
+    document.documentElement.getAttribute('data-theme') === 'dark';
+
+  const bannerBg      = isDarkMode ? '#12122a' : '#1e1b4b';
+  const bannerBorder  = isDarkMode ? 'rgba(99,102,241,0.6)' : 'rgba(99,102,241,0.4)';
+  const titleColor    = isDarkMode ? '#c7d2fe' : '#e0e7ff';
+  const bodyColor     = isDarkMode ? '#a5b4fc' : '#c7d2fe';
+  const labelColor    = isDarkMode ? '#818cf8' : '#a5b4fc';
+  const starColor     = isDarkMode ? '#818cf8' : '#a5b4fc';
+  const closeBtnColor = isDarkMode ? '#6366f1' : '#818cf8';
+  const miniBarBg     = isDarkMode ? '#12122a' : '#1e1b4b';
+  const miniTextColor = isDarkMode ? '#818cf8' : '#a5b4fc';
+
+  return (
     <>
       {showAiBanner ? (
-        <div className="bg-[#12122a] border-b border-indigo-900/60 px-4 py-3 flex-shrink-0">
+        <div className="border-b flex-shrink-0" style={{
+          background: bannerBg,
+          borderColor: bannerBorder,
+          padding: '10px 16px',
+        }}>
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
               <div className="flex items-start gap-2 mb-2">
-                <span className="text-indigo-300 text-sm flex-shrink-0 mt-0.5">✦</span>
+                <span style={{ color: starColor, fontSize: 14, flexShrink: 0, marginTop: 2 }}>✦</span>
                 <div>
-                  <p className="text-xs font-bold text-indigo-200">New to LaTeX? Let AI handle it.</p>
-                  <p className="text-[11px] text-indigo-400 mt-0.5 leading-relaxed">
+                  <p style={{
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: titleColor,
+                    margin: 0,
+                    marginBottom: 3,
+                  }}>
+                    New to LaTeX? Let AI handle it.
+                  </p>
+                  <p style={{
+                    fontSize: 11,
+                    color: bodyColor,
+                    margin: 0,
+                    lineHeight: 1.6,
+                  }}>
                     Copy the code → paste into any AI to customize → compile on Overleaf.
                     Font and layout changes from the left panel update the code automatically.
                   </p>
                 </div>
               </div>
-              <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                <span className="text-[10px] text-indigo-500 font-semibold uppercase tracking-wider">Use with:</span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginTop: 6 }}>
+                <span style={{
+                  fontSize: 10,
+                  color: labelColor,
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                }}>
+                  Use with:
+                </span>
                 {AI_PLATFORMS.map(p => (
                   <a key={p.name} href={p.url} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold hover:opacity-80"
-                    style={{ background: `${p.color}20`, color: p.color, border: `1px solid ${p.color}30` }}>
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4,
+                      padding: '2px 8px',
+                      borderRadius: 6,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      background: `${p.color}25`,
+                      color: p.color,
+                      border: `1px solid ${p.color}40`,
+                      textDecoration: 'none',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
+                    onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+                  >
                     <FiExternalLink size={9} />
                     {p.name}
                   </a>
                 ))}
               </div>
             </div>
-            <button onClick={() => setShowAiBanner(false)}
-              className="text-indigo-400 hover:text-indigo-200 p-1 flex-shrink-0">
+            <button
+              onClick={() => setShowAiBanner(false)}
+              style={{
+                color: closeBtnColor,
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                padding: 4,
+                flexShrink: 0,
+              }}
+              onMouseEnter={e => (e.currentTarget.style.color = titleColor)}
+              onMouseLeave={e => (e.currentTarget.style.color = closeBtnColor)}
+            >
               <svg viewBox="0 0 12 12" fill="none" width={12} height={12}>
                 <path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
@@ -503,22 +568,53 @@ export default function PreviewPanel() {
           </div>
         </div>
       ) : (
-        <div className="bg-[#12122a] border-b border-indigo-900/40 px-4 py-1.5 flex-shrink-0 flex items-center gap-3">
-          <span className="text-[10px] text-indigo-400 font-medium">LaTeX Tips</span>
-          <div className="flex gap-2">
+        <div className="border-b flex-shrink-0" style={{
+          background: miniBarBg,
+          borderColor: bannerBorder,
+          padding: '6px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+        }}>
+          <span style={{ fontSize: 10, color: miniTextColor, fontWeight: 600 }}>
+            LaTeX Tips
+          </span>
+          <div style={{ display: 'flex', gap: 10 }}>
             {AI_PLATFORMS.map(p => (
               <a key={p.name} href={p.url} target="_blank" rel="noopener noreferrer"
-                className="text-[10px] font-semibold hover:underline" style={{ color: p.color }}>
+                style={{
+                  fontSize: 10,
+                  fontWeight: 600,
+                  color: p.color,
+                  textDecoration: 'none',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.textDecoration = 'underline')}
+                onMouseLeave={e => (e.currentTarget.style.textDecoration = 'none')}
+              >
                 {p.name}
               </a>
             ))}
           </div>
-          <button onClick={() => setShowAiBanner(true)}
-            className="ml-auto text-[10px] text-indigo-500 hover:text-indigo-300">Show tips</button>
+          <button
+            onClick={() => setShowAiBanner(true)}
+            style={{
+              marginLeft: 'auto',
+              fontSize: 10,
+              color: miniTextColor,
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.color = titleColor)}
+            onMouseLeave={e => (e.currentTarget.style.color = miniTextColor)}
+          >
+            Show tips
+          </button>
         </div>
       )}
     </>
   );
+};
 
   /* ── LaTeX code view ── */
   const LaTeXView = ({ inMaximized = false }: { inMaximized?: boolean }) => {
