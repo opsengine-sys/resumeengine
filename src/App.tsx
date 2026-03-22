@@ -12,7 +12,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { FiEye, FiEdit3, FiHome } from 'react-icons/fi';
 
-/* ── Home Button — distinct amber/teal gradient ── */
 function HomeButton({ onClick }: { onClick: () => void }) {
   const { isDark } = useTheme();
   const [hov, setHov] = useState(false);
@@ -37,7 +36,6 @@ function HomeButton({ onClick }: { onClick: () => void }) {
           : '0 0 16px rgba(13,148,136,0.4), 0 4px 16px rgba(0,0,0,0.25)',
       }}
     >
-      {/* Animated shimmer on hover */}
       <AnimatePresence>
         {hov && (
           <motion.span
@@ -52,7 +50,6 @@ function HomeButton({ onClick }: { onClick: () => void }) {
       </AnimatePresence>
       <FiHome size={16} strokeWidth={2.2} />
       <span style={{ letterSpacing: '0.02em' }}>Home</span>
-      {/* Continuous glow pulse */}
       <motion.span
         className="absolute inset-0 rounded-2xl pointer-events-none"
         animate={{ opacity: [0, 0.2, 0] }}
@@ -70,21 +67,29 @@ const MAX_EDITOR  = 700;
 const MIN_PREVIEW = 280;
 const DIVIDER_W   = 5;
 
-function BuilderApp({ onGoHome }: { onGoHome: () => void }) {
+function BuilderApp({ onGoHome, startTemplate }: { onGoHome: () => void; startTemplate: string | null }) {
   const { showTemplateModal, showResumeListModal } = useResumeStore();
+  const updateTemplate = useResumeStore(s => s.updateTemplate);
   const { isDark } = useTheme();
   const [showExportModal, setShowExportModal] = useState(false);
   const [mobileTab, setMobileTab] = useState<'editor' | 'preview'>('editor');
-
+  const [showEditor, setShowEditor] = useState(true);
   const [sidebarW, setSidebarW] = useState(242);
-  const [editorW,  setEditorW]  = useState(460);
+  const [editorW, setEditorW]   = useState(460);
 
-  const dragging    = useRef<'sidebar' | 'editor' | null>(null);
-  const startX      = useRef(0);
-  const startSideW  = useRef(0);
-  const startEditW  = useRef(0);
+  const dragging     = useRef<'sidebar' | 'editor' | null>(null);
+  const startX       = useRef(0);
+  const startSideW   = useRef(0);
+  const startEditW   = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    if (startTemplate) {
+      updateTemplate(startTemplate);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onMouseDown = useCallback(
     (which: 'sidebar' | 'editor') => (e: React.MouseEvent) => {
@@ -103,9 +108,8 @@ function BuilderApp({ onGoHome }: { onGoHome: () => void }) {
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
       if (!dragging.current) return;
-      const delta = e.clientX - startX.current;
+      const delta     = e.clientX - startX.current;
       const containerW = containerRef.current?.clientWidth ?? window.innerWidth;
-
       if (dragging.current === 'sidebar') {
         setSidebarW(Math.min(MAX_SIDEBAR, Math.max(MIN_SIDEBAR, startSideW.current + delta)));
       } else {
@@ -122,8 +126,11 @@ function BuilderApp({ onGoHome }: { onGoHome: () => void }) {
       document.body.style.userSelect = '';
     };
     window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup',   onUp);
-    return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
   }, []);
 
   const Divider = ({ which }: { which: 'sidebar' | 'editor' }) => (
@@ -132,8 +139,14 @@ function BuilderApp({ onGoHome }: { onGoHome: () => void }) {
       className="relative flex-shrink-0 group z-30 hidden md:flex items-center justify-center select-none"
       style={{ width: DIVIDER_W, cursor: 'col-resize', background: 'transparent' }}
     >
-      <div className={`absolute inset-y-0 w-px transition-all duration-150 ${isDark ? 'bg-slate-700 group-hover:bg-emerald-500' : 'bg-gray-200 group-hover:bg-emerald-400'}`} style={{ left: '50%' }}/>
-      <div className={`absolute top-1/2 -translate-y-1/2 w-1 h-12 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-150 ${isDark ? 'bg-emerald-500' : 'bg-emerald-400'}`} style={{ left: '50%', transform: 'translateX(-50%) translateY(-50%)' }}/>
+      <div
+        className={`absolute inset-y-0 w-px transition-all duration-150 ${isDark ? 'bg-slate-700 group-hover:bg-emerald-500' : 'bg-gray-200 group-hover:bg-emerald-400'}`}
+        style={{ left: '50%' }}
+      />
+      <div
+        className={`absolute top-1/2 -translate-y-1/2 w-1 h-12 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-150 ${isDark ? 'bg-emerald-500' : 'bg-emerald-400'}`}
+        style={{ left: '50%', transform: 'translateX(-50%) translateY(-50%)' }}
+      />
     </div>
   );
 
@@ -148,57 +161,81 @@ function BuilderApp({ onGoHome }: { onGoHome: () => void }) {
       style={{ background: bg, color: 'var(--ui-text)' }}
     >
       {/* ── Sidebar ── */}
-      <div className="flex-shrink-0 h-full overflow-hidden hidden md:block"
-        style={{ width: sidebarW, minWidth: sidebarW, maxWidth: sidebarW,
+      <div
+        className="flex-shrink-0 h-full overflow-hidden hidden md:block"
+        style={{
+          width: sidebarW, minWidth: sidebarW, maxWidth: sidebarW,
           pointerEvents: isDragging ? 'none' : undefined,
-          background: panelBg, borderRight: bdr }}>
-        <Sidebar onExport={() => setShowExportModal(true)} onGoHome={onGoHome} />
+          background: panelBg, borderRight: bdr,
+        }}
+      >
+        <Sidebar
+          onExport={() => setShowExportModal(true)}
+          onGoHome={onGoHome}
+          onTabChange={(tab) => setShowEditor(tab === 'sections')}
+        />
       </div>
 
       <Divider which="sidebar" />
 
-      {/* ── Editor ── */}
-      <div
-        className={`flex-shrink-0 h-full overflow-hidden ${mobileTab === 'preview' ? 'hidden md:block' : 'block'}`}
-        style={{ width: editorW, minWidth: editorW, maxWidth: editorW,
-          pointerEvents: isDragging ? 'none' : undefined,
-          background: isDark ? '#0d1526' : '#ffffff', borderRight: bdr }}>
-        <EditorPanel onExport={() => setShowExportModal(true)} />
-      </div>
-
-      <Divider which="editor" />
+      {/* ── Editor — hidden when Templates / Style / Colors tab active ── */}
+      {showEditor && (
+        <>
+          <div
+            className={`flex-shrink-0 h-full overflow-hidden ${mobileTab === 'preview' ? 'hidden md:block' : 'block'}`}
+            style={{
+              width: editorW, minWidth: editorW, maxWidth: editorW,
+              pointerEvents: isDragging ? 'none' : undefined,
+              background: isDark ? '#0d1526' : '#ffffff', borderRight: bdr,
+            }}
+          >
+            <EditorPanel onExport={() => setShowExportModal(true)} />
+          </div>
+          <Divider which="editor" />
+        </>
+      )}
 
       {/* ── Preview ── */}
       <div
         className={`flex-1 h-full overflow-hidden min-w-0 ${mobileTab === 'editor' ? 'hidden md:flex md:flex-col' : 'flex flex-col'}`}
-        style={{ pointerEvents: isDragging ? 'none' : undefined, background: isDark ? '#060c14' : '#e8f0ec' }}>
+        style={{ pointerEvents: isDragging ? 'none' : undefined, background: isDark ? '#060c14' : '#e8f0ec' }}
+      >
         <PreviewPanel />
       </div>
 
-      {/* ── Floating Home + Theme (bottom-right) ── */}
+      {/* ── Floating Home + Theme ── */}
       <div className="fixed bottom-5 right-5 z-50 hidden md:flex flex-col items-end gap-3">
         <ThemeToggle variant="builder" />
         <HomeButton onClick={onGoHome} />
       </div>
 
       {/* ── Mobile bottom bar ── */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 flex md:hidden rounded-2xl shadow-2xl p-1 gap-1"
-        style={{ background: isDark ? '#111827' : '#fff', border: bdr }}>
-        <button onClick={() => setMobileTab('editor')}
+      <div
+        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 flex md:hidden rounded-2xl shadow-2xl p-1 gap-1"
+        style={{ background: isDark ? '#111827' : '#fff', border: bdr }}
+      >
+        <button
+          onClick={() => setMobileTab('editor')}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${mobileTab === 'editor' ? 'bg-emerald-600 text-white shadow-md' : ''}`}
-          style={{ color: mobileTab === 'editor' ? '#fff' : 'var(--ui-muted)' }}>
-          <FiEdit3 size={15}/> Edit
+          style={{ color: mobileTab === 'editor' ? '#fff' : 'var(--ui-muted)' }}
+        >
+          <FiEdit3 size={15} /> Edit
         </button>
-        <button onClick={() => setMobileTab('preview')}
+        <button
+          onClick={() => setMobileTab('preview')}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${mobileTab === 'preview' ? 'bg-emerald-600 text-white shadow-md' : ''}`}
-          style={{ color: mobileTab === 'preview' ? '#fff' : 'var(--ui-muted)' }}>
-          <FiEye size={15}/> Preview
+          style={{ color: mobileTab === 'preview' ? '#fff' : 'var(--ui-muted)' }}
+        >
+          <FiEye size={15} /> Preview
         </button>
-        <button onClick={onGoHome}
+        <button
+          onClick={onGoHome}
           className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all hover:text-emerald-500"
-          style={{ color: 'var(--ui-muted)' }} title="Home">
+          style={{ color: 'var(--ui-muted)' }}
+          title="Home"
+        >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9" />
           </svg>
         </button>
       </div>
@@ -212,20 +249,42 @@ function BuilderApp({ onGoHome }: { onGoHome: () => void }) {
 }
 
 export function App() {
-  const [view, setView] = useState<'landing' | 'builder'>('landing');
+  const [view, setView]                   = useState<'landing' | 'builder'>('landing');
+  const [startTemplate, setStartTemplate] = useState<string | null>(null);
   return (
     <ThemeProvider>
-      <AppInner view={view} onSetView={setView} />
+      <AppInner
+        view={view}
+        onSetView={setView}
+        startTemplate={startTemplate}
+        setStartTemplate={setStartTemplate}
+      />
     </ThemeProvider>
   );
 }
 
-function AppInner({ view, onSetView }: { view: 'landing' | 'builder'; onSetView: (v: 'landing' | 'builder') => void }) {
+function AppInner({
+  view, onSetView, startTemplate, setStartTemplate,
+}: {
+  view: 'landing' | 'builder';
+  onSetView: (v: 'landing' | 'builder') => void;
+  startTemplate: string | null;
+  setStartTemplate: (t: string | null) => void;
+}) {
   const { isDark } = useTheme();
+
   useEffect(() => {
     document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
   }, [isDark]);
 
-  if (view === 'landing') return <LandingPage onEnterBuilder={() => onSetView('builder')} />;
-  return <BuilderApp onGoHome={() => onSetView('landing')} />;
+  if (view === 'landing') return (
+    <LandingPage
+      onEnterBuilder={(templateId?: string) => {
+        setStartTemplate(templateId ?? null);
+        onSetView('builder');
+      }}
+    />
+  );
+
+  return <BuilderApp onGoHome={() => onSetView('landing')} startTemplate={startTemplate} />;
 }

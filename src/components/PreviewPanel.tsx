@@ -6,7 +6,7 @@ import { generateLatex, RESUME_CLS } from '../utils/latexGenerator';
 import {
   FiZoomIn, FiZoomOut, FiMonitor, FiMaximize2, FiMinimize2, FiChevronDown,
   FiCode, FiEye, FiCopy, FiCheck, FiDownload, FiExternalLink,
-  FiEdit3, FiRefreshCw,
+  FiRefreshCw,
 } from 'react-icons/fi';
 
 
@@ -195,7 +195,6 @@ export default function PreviewPanel() {
   const { getActiveResume } = useResumeStore();
   const resume = getActiveResume();
   const containerRef = useRef<HTMLDivElement>(null);
-  const textareaRef  = useRef<HTMLTextAreaElement>(null);
   const isLatex = resume?.templateId === 'latex';
 
   /* Page size */
@@ -211,11 +210,6 @@ export default function PreviewPanel() {
   const [showAiBanner, setShowAiBanner] = useState(true);
   const [previewKey,   setPreviewKey]   = useState(0);
 
-  /* Custom LaTeX overrides */
-  const [customMain, setCustomMain] = useState<string | null>(null);
-  const [customCls,  setCustomCls]  = useState<string | null>(null);
-  const [editBuffer, setEditBuffer] = useState('');
-  const [isEditing,  setIsEditing]  = useState(false);
 
   /* Zoom — fit to container */
   const computeFitZoom = useCallback(() => {
@@ -249,42 +243,11 @@ export default function PreviewPanel() {
 
   const pct   = Math.round(zoom * 100);
 
-  /* LaTeX sources */
+  /* LaTeX sources — always auto-generated from resume data */
   const generatedMain = isLatex ? generateLatex(resume) : '';
   const generatedCls  = RESUME_CLS;
-  const activeCustom  = latexFile === 'main' ? customMain : customCls;
-  const activeCode    = isEditing
-    ? editBuffer
-    : (activeCustom ?? (latexFile === 'main' ? generatedMain : generatedCls));
-  const isEdited = activeCustom !== null;
-  const fileName = latexFile === 'main' ? 'resume.tex' : 'resume.cls';
-
-  const enterEdit = () => {
-    const code = activeCustom ?? (latexFile === 'main' ? generatedMain : generatedCls);
-    setEditBuffer(code);
-    setIsEditing(true);
-    setTimeout(() => textareaRef.current?.focus(), 50);
-  };
-  const handleEditChange = (val: string) => {
-    setEditBuffer(val);
-    if (latexFile === 'main') setCustomMain(val);
-    else setCustomCls(val);
-  };
-  const applyEdit = () => {
-    if (latexFile === 'main') setCustomMain(editBuffer);
-    else setCustomCls(editBuffer);
-    setIsEditing(false);
-  };
-  const discardEdit = () => {
-    setIsEditing(false);
-    setEditBuffer(activeCustom ?? (latexFile === 'main' ? generatedMain : generatedCls));
-  };
-  const resetToGenerated = () => {
-    if (latexFile === 'main') setCustomMain(null);
-    else setCustomCls(null);
-    setIsEditing(false);
-    setEditBuffer('');
-  };
+  const activeCode    = latexFile === 'main' ? generatedMain : generatedCls;
+  const fileName = latexFile === 'main' ? 'resume.tex' : 'resume.cls';;
   const copyCode = async () => {
     await navigator.clipboard.writeText(activeCode);
     setCopied(true);
@@ -463,7 +426,6 @@ export default function PreviewPanel() {
               boxShadow: tab === 'latex' ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
             }}>
             <FiCode size={11} /> LaTeX Code
-            {isEdited && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 ml-0.5" title="Manually edited" />}
           </button>
         </div>
       )}
@@ -473,42 +435,16 @@ export default function PreviewPanel() {
         {tab === 'preview' && <ZoomControls />}
         {tab === 'latex' && (
           <>
-            {isEditing ? (
-              <>
-                <button onClick={discardEdit}
-                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border"
-                  style={{ background: 'var(--ui-surface2)', color: 'var(--ui-text2)', borderColor: 'var(--ui-border)' }}>
-                  Cancel
-                </button>
-                <button onClick={applyEdit}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-semibold shadow-sm">
-                  <FiCheck size={11} /> Done
-                </button>
-              </>
-            ) : (
-              <>
-                {isEdited && (
-                  <button onClick={resetToGenerated}
-                    className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 text-xs font-semibold border border-amber-200">
-                    <FiRefreshCw size={10} /> Reset
-                  </button>
-                )}
-                <button onClick={enterEdit}
-                  className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-semibold border border-blue-200">
-                  <FiEdit3 size={10} /> Edit
-                </button>
-                <button onClick={copyCode}
-                  className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold border border-emerald-200">
-                  {copied ? <FiCheck size={10} /> : <FiCopy size={10} />}
-                  {copied ? 'Copied!' : 'Copy'}
-                </button>
-                <button onClick={downloadCode}
-                  className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-semibold border"
-                  style={{ background: 'var(--ui-surface2)', color: 'var(--ui-text2)', borderColor: 'var(--ui-border)' }}>
-                  <FiDownload size={10} /> {fileName}
-                </button>
-              </>
-            )}
+            <button onClick={copyCode}
+              className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold border border-emerald-200">
+              {copied ? <FiCheck size={10} /> : <FiCopy size={10} />}
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
+            <button onClick={downloadCode}
+              className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-semibold border"
+              style={{ background: 'var(--ui-surface2)', color: 'var(--ui-text2)', borderColor: 'var(--ui-border)' }}>
+              <FiDownload size={10} /> {fileName}
+            </button>
           </>
         )}
         {/* Maximize */}
@@ -541,8 +477,8 @@ export default function PreviewPanel() {
                 <div>
                   <p className="text-xs font-bold text-indigo-200">New to LaTeX? Let AI handle it.</p>
                   <p className="text-[11px] text-indigo-400 mt-0.5 leading-relaxed">
-                    Copy code → paste into any AI → ask it to customize → click <strong className="text-blue-300">Edit</strong> to paste result back.
-                    Changes reflect live in Resume Preview tab.
+                    Copy the code → paste into any AI to customize → compile on Overleaf.
+                    Font and layout changes from the left panel update the code automatically.
                   </p>
                 </div>
               </div>
@@ -607,7 +543,7 @@ export default function PreviewPanel() {
         <div className="flex items-center gap-0.5 px-3 pt-2 pb-0 border-b flex-shrink-0"
           style={{ background: '#1a1a2e', borderColor: '#2a2a4e' }}>
           {(['main','cls'] as LatexFile[]).map(f => (
-            <button key={f} onClick={() => { setLatexFile(f); if (isEditing) discardEdit(); }}
+            <button key={f} onClick={() => setLatexFile(f)}
               className="px-3 py-1.5 rounded-t-md text-xs font-mono transition-colors"
               style={{
                 background: latexFile === f ? '#12122a' : 'transparent',
@@ -615,42 +551,16 @@ export default function PreviewPanel() {
                 borderBottom: latexFile === f ? '2px solid #10b981' : '2px solid transparent',
               }}>
               {f === 'main' ? 'resume.tex' : 'resume.cls'}
-              {latexFile === f && isEdited && <span className="ml-1.5 w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />}
             </button>
           ))}
         </div>
-        {isEdited && !isEditing && (
-          <div className="px-3 py-1.5 flex items-center gap-2 text-[11px] flex-shrink-0"
-            style={{ background: '#1a1a0e', borderBottom: '1px solid #3d3a00' }}>
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />
-            <span className="text-amber-400 font-medium">Manually edited</span>
-            <button onClick={resetToGenerated} className="ml-auto text-amber-500 hover:text-amber-300 underline text-[10px]">
-              Reset to auto-generated ↺
-            </button>
-          </div>
-        )}
         {/* Code area */}
         <div className="flex-1 min-h-0 overflow-auto relative" style={{ background: '#12122a' }}>
-          {isEditing ? (
-            <textarea
-              ref={textareaRef}
-              value={editBuffer}
-              onChange={e => handleEditChange(e.target.value)}
-              spellCheck={false}
-              className="w-full h-full p-4 font-mono text-xs leading-relaxed resize-none outline-none border-none"
-              style={{
-                background: '#0e0e1e', color: '#cdd3de',
-                minHeight: inMaximized ? 'calc(100vh - 200px)' : '400px',
-                tabSize: 2,
-              }}
-            />
-          ) : (
-            <pre
-              className="p-4 font-mono text-xs leading-relaxed overflow-auto"
-              style={{ color: '#cdd3de', margin: 0, background: 'transparent' }}
-              dangerouslySetInnerHTML={{ __html: highlight(activeCode) }}
-            />
-          )}
+          <pre
+            className="p-4 font-mono text-xs leading-relaxed overflow-auto"
+            style={{ color: '#cdd3de', margin: 0, background: 'transparent' }}
+            dangerouslySetInnerHTML={{ __html: highlight(activeCode) }}
+          />
         </div>
         <div className="px-3 py-1 flex items-center gap-3 text-[10px] flex-shrink-0"
           style={{ background: '#0e0e1e', color: '#546e7a', borderTop: '1px solid #1e1e3a' }}>

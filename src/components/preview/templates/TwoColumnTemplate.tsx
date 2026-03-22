@@ -52,10 +52,9 @@ export default function TwoColumnTemplate({ resume, template, visibleSections }:
   const fullName = `${p.firstName} ${p.lastName}`.trim();
   const bs = typo.baseFontSize;
 
-  const leftKeys = ['skills', 'languages', 'certifications', 'achievements', 'volunteer', 'publications', 'references'];
+  const leftKeys  = ['skills', 'languages', 'certifications', 'achievements', 'volunteer', 'publications', 'references'];
   const rightKeys = ['summary', 'experience', 'education', 'projects'];
 
-  // Custom sections go to main (right) column
   const leftVisible  = visibleSections.filter(s => leftKeys.includes(s.key));
   const rightVisible = visibleSections.filter(s => rightKeys.includes(s.key) || s.isCustom);
 
@@ -68,7 +67,7 @@ export default function TwoColumnTemplate({ resume, template, visibleSections }:
           color: 'rgba(255,255,255,0.9)',
           fontSize: `${fs}px`,
           fontFamily: s.fontFamily ?? globalFont,
-          fontWeight: s.fontWeight === 'bold' ? 700 : 700,
+          fontWeight: 700,
           fontStyle: s.isItalic ? 'italic' : 'normal',
           textTransform: (s.letterCase === 'normal' || !s.letterCase ? 'uppercase' : s.letterCase) as React.CSSProperties['textTransform'],
           letterSpacing: '2px',
@@ -91,7 +90,7 @@ export default function TwoColumnTemplate({ resume, template, visibleSections }:
           color: primaryColor,
           fontSize: `${fs}px`,
           fontFamily: s.fontFamily ?? globalFont,
-          fontWeight: s.fontWeight === 'bold' ? 700 : 700,
+          fontWeight: 700,
           fontStyle: s.isItalic ? 'italic' : 'normal',
           textTransform: (s.letterCase === 'normal' || !s.letterCase ? 'uppercase' : s.letterCase) as React.CSSProperties['textTransform'],
           letterSpacing: '2px',
@@ -218,7 +217,6 @@ export default function TwoColumnTemplate({ resume, template, visibleSections }:
   const renderMain = (section: SectionConfig) => {
     const key = section.key;
 
-    // Custom sections in main column
     if (section.isCustom) {
       if (!section.customEntries || section.customEntries.length === 0) return null;
       return (
@@ -375,33 +373,24 @@ export default function TwoColumnTemplate({ resume, template, visibleSections }:
           </div>
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px 16px', marginTop: '10px' }}>
-          {p.email && <a href={`mailto:${p.email}`} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: `${bs - 1}px`, color: 'rgba(255,255,255,0.88)', textDecoration: 'none' }}><FiMail size={bs - 2} />{p.email}</a>}
-          {p.phone && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: `${bs - 1}px`, color: 'rgba(255,255,255,0.88)' }}><FiPhone size={bs - 2} />{p.phone}</span>}
+          {p.email    && <a href={`mailto:${p.email}`} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: `${bs - 1}px`, color: 'rgba(255,255,255,0.88)', textDecoration: 'none' }}><FiMail size={bs - 2} />{p.email}</a>}
+          {p.phone    && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: `${bs - 1}px`, color: 'rgba(255,255,255,0.88)' }}><FiPhone size={bs - 2} />{p.phone}</span>}
           {p.location && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: `${bs - 1}px`, color: 'rgba(255,255,255,0.88)' }}><FiMapPin size={bs - 2} />{p.location}</span>}
           {p.linkedIn && <a href={toHref(p.linkedIn)} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: `${bs - 1}px`, color: 'rgba(255,255,255,0.88)', textDecoration: 'underline', textUnderlineOffset: '2px' }}><FiLinkedin size={bs - 2} />{p.linkedIn}</a>}
-          {p.github && <a href={toHref(p.github)} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: `${bs - 1}px`, color: 'rgba(255,255,255,0.88)', textDecoration: 'underline', textUnderlineOffset: '2px' }}><FiGithub size={bs - 2} />{p.github}</a>}
+          {p.github   && <a href={toHref(p.github)} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: `${bs - 1}px`, color: 'rgba(255,255,255,0.88)', textDecoration: 'underline', textUnderlineOffset: '2px' }}><FiGithub size={bs - 2} />{p.github}</a>}
           {p.portfolio && <a href={toHref(p.portfolio)} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: `${bs - 1}px`, color: 'rgba(255,255,255,0.88)', textDecoration: 'underline', textUnderlineOffset: '2px' }}><FiGlobe size={bs - 2} />{p.portfolio}</a>}
         </div>
       </div>
 
       {/* Two Column Body */}
       <div style={{ display: 'flex', flex: 1 }}>
-        {/* Left Sidebar */}
         <div style={{ backgroundColor: `${primaryColor}ee`, width: '190px', flexShrink: 0, padding: `${typo.pagePaddingY}px ${typo.pagePaddingX * 0.6}px` }}>
           {leftVisible.map(s => renderSidebar(s))}
         </div>
-
-        {/* Right Main Content */}
         <div style={{ flex: 1, padding: `${typo.pagePaddingY}px ${typo.pagePaddingX}px` }}>
           {rightVisible.map(s => renderMain(s))}
         </div>
       </div>
-
-      {clr.showPageNumbers && (
-        <div style={{ textAlign: 'right', padding: `4px ${typo.pagePaddingX}px 8px`, fontSize: `${bs - 2}px`, color: clr.mutedColor }}>
-          Page 1
-        </div>
-      )}
     </div>
   );
 }

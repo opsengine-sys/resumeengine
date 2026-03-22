@@ -1,12 +1,18 @@
 /**
  * LaTeXTemplate.tsx
- * Visual preview of the LaTeX/FAANG ATS-safe resume template.
- * Mimics the classic academic single-column style with centered header,
- * uppercase section titles, full-width hrule dividers, and bullet points.
+ * Faithfully mirrors the resume.cls + geometry layout:
+ *   - Margins: 0.4in top/left/right, 0.7in bottom
+ *   - 11pt base, linespread 0.94 → lineHeight ~1.1
+ *   - Name: \LARGE bold centered
+ *   - Address lines: centered, plain
+ *   - Sections: UPPERCASE BOLD + full-width hrule
+ *   - Skills/Certs: two-column tabularx layout
+ *   - Page number: bottom-right (handled via @page CSS in ExportModal)
+ *   - Font: CMU Serif / Georgia / serif fallback
  */
 
+import React from 'react';
 import { Resume, Template, SectionConfig } from '../../../types/resume';
-import { DEFAULT_TYPOGRAPHY } from '../../../data/defaultData';
 
 interface Props {
   resume: Resume;
@@ -14,111 +20,103 @@ interface Props {
   visibleSections: SectionConfig[];
 }
 
+/* ── Constants matching resume.cls + geometry ── */
+const FONT   = "'CMU Serif', 'Computer Modern', Georgia, serif";
+const BASE   = 11;       /* px  ≈ 11pt */
+const LH     = 1.1;      /* linespread 0.94 × 1.2 natural ≈ 1.13, round to 1.1 */
+const PAD_H  = 38;       /* 0.4in @ 96dpi */
+const PAD_B  = 67;       /* 0.7in @ 96dpi */
+const NAME_SIZE  = 18;   /* \LARGE at 11pt base ≈ 17–19px */
+const SECTION_FS = 11;   /* same as base, bold + uppercase */
+const MUTED  = '#444444';
+const BLACK  = '#111111';
+const LINK   = '#0000EE'; /* classic browser blue, matches LaTeX urlcolor=blue */
+const SEC_GAP = 8;        /* \medskip between sections */
+const ITEM_GAP = 2;       /* itemsep=0.15em */
+
+/* ── Helpers ── */
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function fd(d: string): string {
   if (!d) return '';
   const [y, m] = d.split('-');
   return `${MONTHS[parseInt(m) - 1] ?? ''} ${y}`;
 }
-
 function toHref(url: string): string {
-  if (!url) return '';
+  if (!url) return '#';
   return /^https?:\/\//i.test(url) ? url : `https://${url}`;
 }
 
-function Link({ url, children }: { url: string; children: React.ReactNode }) {
-  if (!url) return <>{children}</>;
+/* ── Sub-components ── */
+
+/** Full-width section heading: UPPERCASE BOLD + hrule */
+function SecHead({ label }: { label: string }) {
   return (
-    <a
-      href={toHref(url)}
-      target="_blank"
-      rel="noopener noreferrer"
-      style={{ color: '#1a56db', textDecoration: 'underline', textUnderlineOffset: '2px' }}
-    >
+    <div style={{ marginTop: SEC_GAP * 1.5, marginBottom: 4 }}>
+      <div style={{
+        fontFamily:    FONT,
+        fontSize:      SECTION_FS,
+        fontWeight:    700,
+        color:         BLACK,
+        letterSpacing: '0.04em',
+        textTransform: 'uppercase',
+        marginBottom:  3,
+      }}>
+        {label}
+      </div>
+      <div style={{ borderTop: `1px solid ${BLACK}`, width: '100%' }} />
+    </div>
+  );
+}
+
+/** Inline link styled like LaTeX urlcolor=blue */
+function HRef({ url, children }: { url: string; children: React.ReactNode }) {
+  return (
+    <a href={toHref(url)} target="_blank" rel="noopener noreferrer"
+      style={{ color: LINK, textDecoration: 'underline', textUnderlineOffset: '1px' }}>
       {children}
     </a>
   );
 }
 
+/** Bullet list matching \begin{itemize}[itemsep=0.15em] */
+function BulletList({ items }: { items: string[] }) {
+  return (
+    <ul style={{ margin: '3px 0 0', paddingLeft: 16, listStyleType: 'disc' }}>
+      {items.map((text, i) => (
+        <li key={i} style={{
+          fontFamily:  FONT,
+          fontSize:    BASE,
+          color:       BLACK,
+          lineHeight:  LH,
+          marginBottom: ITEM_GAP,
+        }}>
+          {text}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/* ── Main component ── */
 export default function LaTeXTemplate({ resume, visibleSections }: Props) {
-  const typo = resume.typography ?? DEFAULT_TYPOGRAPHY;
   const d = resume.data;
   const p = d.personal;
-  const bs = typo.baseFontSize;
-  const clr = resume.colors ?? {
-    textColor: '#111827', headingColor: '#111827',
-    linkColor: '#1a56db', mutedColor: '#374151',
-    showBorder: false, borderColor: '#e5e7eb', showPageNumbers: false,
-  };
+  const fullName = `${p.firstName} ${p.lastName}`.trim() || 'Your Name';
 
-  const visKeys = visibleSections.map(s => s.key);
-  const sectionLabel = (key: string): string => {
-    const s = resume.sections.find(sec => sec.key === key);
-    return (s?.label ?? key).toUpperCase();
-  };
+  /* Section label from resume.sections (respects renames) */
+  const secLabel = (key: string, fallback: string) =>
+    resume.sections.find(s => s.key === key)?.label ?? fallback;
 
-  /* ── Section heading — matches LaTeX \rSection style ── */
-  const SectionHead = ({ skey }: { skey: string }) => (
-    <div style={{ marginTop: typo.sectionSpacing, marginBottom: Math.round(typo.sectionSpacing * 0.35) }}>
-      <div style={{
-        fontWeight: 700,
-        fontSize: bs + 1,
-        color: clr.headingColor,
-        letterSpacing: '0.06em',
-        marginBottom: 3,
-        fontFamily: typo.fontFamily,
-      }}>
-        {sectionLabel(skey)}
-      </div>
-      <hr style={{ border: 'none', borderTop: `1px solid ${clr.headingColor}`, margin: 0 }} />
-    </div>
-  );
+  /* ── Section renderers ── */
 
-  /* ── Renderers ── */
   const renderSummary = () => {
     if (!d.summary) return null;
     return (
       <div>
-        <SectionHead skey="summary" />
-        <p style={{ fontSize: bs, lineHeight: typo.lineHeight, color: clr.textColor, margin: 0 }}>
+        <SecHead label={secLabel('summary', 'Objective')} />
+        <p style={{ fontFamily: FONT, fontSize: BASE, color: BLACK, lineHeight: LH, margin: '4px 0 0' }}>
           {d.summary}
         </p>
-      </div>
-    );
-  };
-
-  const renderExperience = () => {
-    if (!d.experience.length) return null;
-    return (
-      <div>
-        <SectionHead skey="experience" />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: typo.itemSpacing }}>
-          {d.experience.map(e => (
-            <div key={e.id}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <span style={{ fontWeight: 700, fontSize: bs + 1, color: clr.headingColor }}>{e.jobTitle}</span>
-                <span style={{ fontSize: bs - 1, color: clr.mutedColor, flexShrink: 0, marginLeft: 8 }}>
-                  {fd(e.startDate)} – {e.currentlyWorking ? 'Present' : fd(e.endDate)}
-                </span>
-              </div>
-              <div style={{ fontStyle: 'italic', fontSize: bs, color: clr.mutedColor }}>
-                {e.company}{e.location ? `, ${e.location}` : ''}
-              </div>
-              {e.description && (
-                <p style={{ fontSize: bs, color: clr.textColor, margin: '2px 0 0', lineHeight: typo.lineHeight }}>{e.description}</p>
-              )}
-              {e.bullets.length > 0 && (
-                <ul style={{ margin: '4px 0 0', paddingLeft: 18, listStyle: 'disc' }}>
-                  {e.bullets.map(b => (
-                    <li key={b.id} style={{ fontSize: bs, color: clr.textColor, lineHeight: typo.lineHeight, marginBottom: 2 }}>
-                      {b.text}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ))}
-        </div>
       </div>
     );
   };
@@ -127,21 +125,23 @@ export default function LaTeXTemplate({ resume, visibleSections }: Props) {
     if (!d.education.length) return null;
     return (
       <div>
-        <SectionHead skey="education" />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: Math.round(typo.itemSpacing * 0.7) }}>
+        <SecHead label={secLabel('education', 'Education')} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 4 }}>
           {d.education.map(e => (
-            <div key={e.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div key={e.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
               <div>
-                <span style={{ fontWeight: 700, fontSize: bs, color: clr.headingColor }}>
+                <span style={{ fontFamily: FONT, fontSize: BASE, fontWeight: 700, color: BLACK }}>
                   {e.degree}{e.fieldOfStudy ? ` in ${e.fieldOfStudy}` : ''}
                 </span>
-                {', '}
-                <span style={{ fontSize: bs, color: clr.textColor }}>{e.institution}</span>
-                {e.location && <span style={{ fontSize: bs - 1, color: clr.mutedColor }}>{`, ${e.location}`}</span>}
-                {e.gpa && <span style={{ fontSize: bs - 1, color: clr.mutedColor }}> — GPA: {e.gpa}</span>}
+                {e.institution && (
+                  <span style={{ fontFamily: FONT, fontSize: BASE, color: BLACK }}>
+                    {', '}{e.institution}{e.location ? `, ${e.location}` : ''}
+                  </span>
+                )}
+                {e.gpa && <span style={{ fontSize: BASE - 1, color: MUTED }}> — GPA: {e.gpa}</span>}
               </div>
-              <span style={{ fontSize: bs - 1, color: clr.mutedColor, flexShrink: 0, marginLeft: 8 }}>
-                {fd(e.startDate)} – {fd(e.endDate)}
+              <span style={{ fontFamily: FONT, fontSize: BASE, color: BLACK, whiteSpace: 'nowrap', marginLeft: 8 }}>
+                {fd(e.startDate)}{fd(e.endDate) ? ` -- ${fd(e.endDate)}` : ''}
               </span>
             </div>
           ))}
@@ -153,19 +153,103 @@ export default function LaTeXTemplate({ resume, visibleSections }: Props) {
   const renderSkills = () => {
     if (!d.skills.length) return null;
     const cats = ['Technical', 'Tools', 'Soft', 'Other'] as const;
-    const grouped = cats.map(cat => ({
-      cat,
-      skills: d.skills.filter(s => s.category === cat),
-    })).filter(g => g.skills.length > 0);
+    const groups = cats
+      .map(cat => ({ cat, items: d.skills.filter(s => s.category === cat).map(s => s.name) }))
+      .filter(g => g.items.length > 0);
+
+    /* Split into two columns like tabularx */
+    const half  = Math.ceil(groups.length / 2);
+    const left  = groups.slice(0, half);
+    const right = groups.slice(half);
+
+    const renderCol = (grps: typeof groups) => (
+      <ul style={{ margin: 0, paddingLeft: 16, listStyleType: 'disc', flex: 1 }}>
+        {grps.flatMap(g => g.items.map((item, i) => (
+          <li key={`${g.cat}-${i}`} style={{ fontFamily: FONT, fontSize: BASE, color: BLACK, lineHeight: LH, marginBottom: ITEM_GAP }}>
+            {i === 0 && grps.length > 1
+              ? <><strong>{g.cat}:</strong> {item}</>
+              : item}
+          </li>
+        )))}
+      </ul>
+    );
+
+    /* If we have enough skills for two columns, split them */
+    const allSkillNames = d.skills.map(s => s.name);
+    const mid = Math.ceil(allSkillNames.length / 2);
+    const leftItems  = allSkillNames.slice(0, mid);
+    const rightItems = allSkillNames.slice(mid);
 
     return (
       <div>
-        <SectionHead skey="skills" />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {grouped.map(({ cat, skills }) => (
-            <div key={cat} style={{ display: 'flex', flexWrap: 'wrap', gap: '0 4px', fontSize: bs }}>
-              <span style={{ fontWeight: 700, color: clr.headingColor }}>{cat}: </span>
-              <span style={{ color: clr.textColor }}>{skills.map(s => s.name).join(', ')}</span>
+        <SecHead label={secLabel('skills', 'Skills')} />
+        <div style={{ display: 'flex', gap: 0, marginTop: 4 }}>
+          <ul style={{ margin: 0, paddingLeft: 16, listStyleType: 'disc', flex: 1 }}>
+            {leftItems.map((item, i) => (
+              <li key={i} style={{ fontFamily: FONT, fontSize: BASE, color: BLACK, lineHeight: LH, marginBottom: ITEM_GAP }}>{item}</li>
+            ))}
+          </ul>
+          <ul style={{ margin: 0, paddingLeft: 16, listStyleType: 'disc', flex: 1 }}>
+            {rightItems.map((item, i) => (
+              <li key={i} style={{ fontFamily: FONT, fontSize: BASE, color: BLACK, lineHeight: LH, marginBottom: ITEM_GAP }}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  };
+
+  const renderCertifications = () => {
+    if (!d.certifications.length) return null;
+    const names = d.certifications.map(c =>
+      c.organization ? `${c.name} — ${c.organization}` : c.name
+    );
+    const mid   = Math.ceil(names.length / 2);
+    const left  = names.slice(0, mid);
+    const right = names.slice(mid);
+
+    return (
+      <div>
+        <SecHead label={secLabel('certifications', 'Certifications/Training')} />
+        <div style={{ display: 'flex', gap: 0, marginTop: 4 }}>
+          <ul style={{ margin: 0, paddingLeft: 16, listStyleType: 'disc', flex: 1 }}>
+            {left.map((item, i) => (
+              <li key={i} style={{ fontFamily: FONT, fontSize: BASE, color: BLACK, lineHeight: LH, marginBottom: ITEM_GAP }}>{item}</li>
+            ))}
+          </ul>
+          <ul style={{ margin: 0, paddingLeft: 16, listStyleType: 'disc', flex: 1 }}>
+            {right.map((item, i) => (
+              <li key={i} style={{ fontFamily: FONT, fontSize: BASE, color: BLACK, lineHeight: LH, marginBottom: ITEM_GAP }}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  };
+
+  const renderExperience = () => {
+    if (!d.experience.length) return null;
+    return (
+      <div>
+        <SecHead label={secLabel('experience', 'Experience')} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: SEC_GAP, marginTop: 4 }}>
+          {d.experience.map(e => (
+            <div key={e.id}>
+              {/* \textbf{Title} \hfill Date */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <span style={{ fontFamily: FONT, fontSize: BASE, fontWeight: 700, color: BLACK }}>{e.jobTitle}</span>
+                <span style={{ fontFamily: FONT, fontSize: BASE, color: BLACK, whiteSpace: 'nowrap', marginLeft: 8 }}>
+                  {fd(e.startDate)} -- {e.currentlyWorking ? 'Present' : fd(e.endDate)}
+                </span>
+              </div>
+              {/* \textit{Company, Location} */}
+              <div style={{ fontFamily: FONT, fontSize: BASE, fontStyle: 'italic', color: BLACK, marginBottom: 2 }}>
+                {e.company}{e.location ? `, ${e.location}` : ''}
+              </div>
+              {e.description && (
+                <p style={{ fontFamily: FONT, fontSize: BASE, color: BLACK, lineHeight: LH, margin: '2px 0' }}>{e.description}</p>
+              )}
+              {e.bullets.length > 0 && <BulletList items={e.bullets.map(b => b.text)} />}
             </div>
           ))}
         </div>
@@ -177,41 +261,27 @@ export default function LaTeXTemplate({ resume, visibleSections }: Props) {
     if (!d.projects.length) return null;
     return (
       <div>
-        <SectionHead skey="projects" />
-        <ul style={{ margin: 0, paddingLeft: 18, listStyle: 'disc', display: 'flex', flexDirection: 'column', gap: Math.round(typo.itemSpacing * 0.8) }}>
-          {d.projects.map(pr => (
-            <li key={pr.id} style={{ fontSize: bs, color: clr.textColor, lineHeight: typo.lineHeight }}>
-              <span style={{ fontWeight: 700 }}>
-                {pr.projectUrl ? <Link url={pr.projectUrl}>{pr.title}</Link> : pr.title}
-              </span>
-              {pr.githubUrl && <> | <Link url={pr.githubUrl}>GitHub</Link></>}
-              {pr.description && <> — {pr.description}</>}
-              {pr.technologies && (
-                <div style={{ fontStyle: 'italic', color: clr.mutedColor, fontSize: bs - 1 }}>
-                  Tech: {pr.technologies}
-                </div>
+        <SecHead label={secLabel('projects', 'Projects')} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: SEC_GAP, marginTop: 4 }}>
+          {d.projects.map(proj => (
+            <div key={proj.id}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <span style={{ fontFamily: FONT, fontSize: BASE, fontWeight: 700, color: BLACK }}>
+                  {proj.projectUrl ? <HRef url={proj.projectUrl}>{proj.title}</HRef> : proj.title}
+                  {proj.githubUrl && <> | <HRef url={proj.githubUrl}>GitHub</HRef></>}
+                </span>
+              </div>
+              {proj.description && (
+                <p style={{ fontFamily: FONT, fontSize: BASE, color: BLACK, lineHeight: LH, margin: '2px 0' }}>{proj.description}</p>
               )}
-            </li>
+              {proj.technologies && (
+                <p style={{ fontFamily: FONT, fontSize: BASE - 1, color: MUTED, fontStyle: 'italic', margin: '1px 0' }}>
+                  Tech: {proj.technologies}
+                </p>
+              )}
+            </div>
           ))}
-        </ul>
-      </div>
-    );
-  };
-
-  const renderCertifications = () => {
-    if (!d.certifications.length) return null;
-    return (
-      <div>
-        <SectionHead skey="certifications" />
-        <ul style={{ margin: 0, paddingLeft: 18, listStyle: 'disc', display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {d.certifications.map(c => (
-            <li key={c.id} style={{ fontSize: bs, color: clr.textColor, lineHeight: typo.lineHeight }}>
-              {c.credentialUrl ? <Link url={c.credentialUrl}><strong>{c.name}</strong></Link> : <strong>{c.name}</strong>}
-              {c.organization && ` — ${c.organization}`}
-              {c.issueDate && <span style={{ color: clr.mutedColor }}> ({fd(c.issueDate)}{c.expiryDate ? ` – ${fd(c.expiryDate)}` : ''})</span>}
-            </li>
-          ))}
-        </ul>
+        </div>
       </div>
     );
   };
@@ -220,13 +290,13 @@ export default function LaTeXTemplate({ resume, visibleSections }: Props) {
     if (!d.achievements.length) return null;
     return (
       <div>
-        <SectionHead skey="achievements" />
-        <ul style={{ margin: 0, paddingLeft: 18, listStyle: 'disc', display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <SecHead label={secLabel('achievements', 'Achievements')} />
+        <ul style={{ margin: '4px 0 0', paddingLeft: 16, listStyleType: 'disc' }}>
           {d.achievements.map(a => (
-            <li key={a.id} style={{ fontSize: bs, color: clr.textColor, lineHeight: typo.lineHeight }}>
+            <li key={a.id} style={{ fontFamily: FONT, fontSize: BASE, color: BLACK, lineHeight: LH, marginBottom: ITEM_GAP }}>
               <strong>{a.title}</strong>
               {a.organization && ` — ${a.organization}`}
-              {a.date && <span style={{ color: clr.mutedColor }}> ({fd(a.date)})</span>}
+              {a.date && <span style={{ color: MUTED }}> ({fd(a.date)})</span>}
               {a.description && <span>: {a.description}</span>}
             </li>
           ))}
@@ -239,10 +309,10 @@ export default function LaTeXTemplate({ resume, visibleSections }: Props) {
     if (!d.languages.length) return null;
     return (
       <div>
-        <SectionHead skey="languages" />
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 24px', fontSize: bs }}>
+        <SecHead label={secLabel('languages', 'Languages')} />
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0 24px', marginTop: 4 }}>
           {d.languages.map(l => (
-            <span key={l.id} style={{ color: clr.textColor }}>
+            <span key={l.id} style={{ fontFamily: FONT, fontSize: BASE, color: BLACK, lineHeight: LH }}>
               <strong>{l.name}</strong> — {l.proficiency}
             </span>
           ))}
@@ -255,16 +325,20 @@ export default function LaTeXTemplate({ resume, visibleSections }: Props) {
     if (!d.volunteer.length) return null;
     return (
       <div>
-        <SectionHead skey="volunteer" />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: typo.itemSpacing }}>
+        <SecHead label={secLabel('volunteer', 'Volunteer Experience')} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: SEC_GAP, marginTop: 4 }}>
           {d.volunteer.map(v => (
             <div key={v.id}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <strong style={{ fontSize: bs, color: clr.headingColor }}>{v.role}</strong>
-                <span style={{ fontSize: bs - 1, color: clr.mutedColor }}>{fd(v.startDate)} – {fd(v.endDate)}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <span style={{ fontFamily: FONT, fontSize: BASE, fontWeight: 700, color: BLACK }}>{v.role}</span>
+                <span style={{ fontFamily: FONT, fontSize: BASE, color: BLACK, whiteSpace: 'nowrap', marginLeft: 8 }}>
+                  {fd(v.startDate)} -- {fd(v.endDate)}
+                </span>
               </div>
-              <div style={{ fontStyle: 'italic', fontSize: bs - 1, color: clr.mutedColor }}>{v.organization}</div>
-              {v.description && <p style={{ fontSize: bs, color: clr.textColor, margin: '2px 0 0', lineHeight: typo.lineHeight }}>{v.description}</p>}
+              <div style={{ fontFamily: FONT, fontSize: BASE, fontStyle: 'italic', color: BLACK }}>{v.organization}</div>
+              {v.description && (
+                <p style={{ fontFamily: FONT, fontSize: BASE, color: BLACK, lineHeight: LH, margin: '2px 0' }}>{v.description}</p>
+              )}
             </div>
           ))}
         </div>
@@ -276,14 +350,13 @@ export default function LaTeXTemplate({ resume, visibleSections }: Props) {
     if (!d.publications.length) return null;
     return (
       <div>
-        <SectionHead skey="publications" />
-        <ul style={{ margin: 0, paddingLeft: 18, listStyle: 'disc', display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <SecHead label={secLabel('publications', 'Publications')} />
+        <ul style={{ margin: '4px 0 0', paddingLeft: 16, listStyleType: 'disc' }}>
           {d.publications.map(pub => (
-            <li key={pub.id} style={{ fontSize: bs, color: clr.textColor, lineHeight: typo.lineHeight }}>
-              {pub.url ? <Link url={pub.url}><strong>{pub.title}</strong></Link> : <strong>{pub.title}</strong>}
+            <li key={pub.id} style={{ fontFamily: FONT, fontSize: BASE, color: BLACK, lineHeight: LH, marginBottom: ITEM_GAP }}>
+              {pub.url ? <HRef url={pub.url}><strong>{pub.title}</strong></HRef> : <strong>{pub.title}</strong>}
               {pub.publisher && ` — ${pub.publisher}`}
-              {pub.date && <span style={{ color: clr.mutedColor }}> ({fd(pub.date)})</span>}
-              {pub.description && <div style={{ fontSize: bs - 1, color: clr.mutedColor }}>{pub.description}</div>}
+              {pub.date && <span style={{ color: MUTED }}> ({fd(pub.date)})</span>}
             </li>
           ))}
         </ul>
@@ -295,12 +368,15 @@ export default function LaTeXTemplate({ resume, visibleSections }: Props) {
     if (!d.references.length) return null;
     return (
       <div>
-        <SectionHead skey="references" />
-        <ul style={{ margin: 0, paddingLeft: 18, listStyle: 'disc', display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <SecHead label={secLabel('references', 'References')} />
+        <ul style={{ margin: '4px 0 0', paddingLeft: 16, listStyleType: 'disc' }}>
           {d.references.map(r => (
-            <li key={r.id} style={{ fontSize: bs, color: clr.textColor, lineHeight: typo.lineHeight }}>
-              <strong>{r.name}</strong> — {r.title}{r.company ? ` at ${r.company}` : ''}
-              {r.email && <> | <Link url={`mailto:${r.email}`}>{r.email}</Link></>}
+            <li key={r.id} style={{ fontFamily: FONT, fontSize: BASE, color: BLACK, lineHeight: LH, marginBottom: ITEM_GAP }}>
+              <strong>{r.name}</strong>
+              {r.title && ` — ${r.title}`}
+              {r.company && ` at ${r.company}`}
+              {r.email && <> | <HRef url={`mailto:${r.email}`}>{r.email}</HRef></>}
+              {r.phone && ` | ${r.phone}`}
             </li>
           ))}
         </ul>
@@ -308,107 +384,100 @@ export default function LaTeXTemplate({ resume, visibleSections }: Props) {
     );
   };
 
-  const sectionRenderers: Record<string, (() => React.ReactNode) | undefined> = {
-    summary: renderSummary,
-    experience: renderExperience,
-    education: renderEducation,
-    skills: renderSkills,
-    projects: renderProjects,
-    certifications: renderCertifications,
-    achievements: renderAchievements,
-    languages: renderLanguages,
-    volunteer: renderVolunteer,
-    publications: renderPublications,
-    references: renderReferences,
+  const renderCustomSection = (section: SectionConfig) => {
+    if (!section.customEntries?.length) return null;
+    return (
+      <div>
+        <SecHead label={section.label} />
+        <ul style={{ margin: '4px 0 0', paddingLeft: 16, listStyleType: 'disc' }}>
+          {section.customEntries.map(entry =>
+            entry.fields.filter(f => f.value).map(field => (
+              <li key={field.id} style={{ fontFamily: FONT, fontSize: BASE, color: BLACK, lineHeight: LH, marginBottom: ITEM_GAP }}>
+                <strong>{field.label}:</strong> {field.value}
+              </li>
+            ))
+          )}
+        </ul>
+      </div>
+    );
   };
 
-  const fullName = `${p.firstName} ${p.lastName}`.trim() || 'Your Name';
+  const sectionRenderers: Record<string, (() => React.ReactNode) | undefined> = {
+    summary:        renderSummary,
+    education:      renderEducation,
+    skills:         renderSkills,
+    certifications: renderCertifications,
+    experience:     renderExperience,
+    projects:       renderProjects,
+    achievements:   renderAchievements,
+    languages:      renderLanguages,
+    volunteer:      renderVolunteer,
+    publications:   renderPublications,
+    references:     renderReferences,
+  };
 
   return (
-    <div
-      style={{
-        width: '100%',
-        minHeight: '1123px',
-        background: '#fff',
-        fontFamily: typo.fontFamily || 'Georgia, serif',
-        color: clr.textColor,
-        fontSize: bs,
-        lineHeight: typo.lineHeight,
-        border: clr.showBorder ? `1.5px solid ${clr.borderColor}` : undefined,
-        boxSizing: 'border-box',
-      }}
-    >
-      {/* ── Header — centered, academic LaTeX style ── */}
-      <div style={{
-        textAlign: 'center',
-        padding: `${typo.headerPaddingY}px ${typo.pagePaddingX}px ${Math.round(typo.headerPaddingY * 0.6)}px`,
-        borderBottom: `1px solid ${clr.headingColor}`,
-      }}>
-        <h1 style={{
-          fontSize: typo.headingFontSize + 4,
-          fontWeight: 700,
-          color: clr.headingColor,
-          margin: 0,
-          letterSpacing: '-0.02em',
+    <div style={{
+      width:       '100%',
+      minHeight:   '1123px',
+      background:  '#ffffff',
+      fontFamily:  FONT,
+      color:       BLACK,
+      fontSize:    BASE,
+      lineHeight:  LH,
+      boxSizing:   'border-box',
+      /* Margins: 0.4in top/sides, 0.7in bottom */
+      paddingTop:    PAD_H,
+      paddingLeft:   PAD_H,
+      paddingRight:  PAD_H,
+      paddingBottom: PAD_B,
+    }}>
+
+      {/* ── Centered header: \printname + \printaddress ── */}
+      <div style={{ textAlign: 'center', marginBottom: 6 }}>
+        {/* Name: \LARGE\bf */}
+        <div style={{
+          fontFamily:  FONT,
+          fontSize:    NAME_SIZE,
+          fontWeight:  700,
+          color:       BLACK,
+          letterSpacing: '0.01em',
+          marginBottom: 4,
         }}>
           {fullName}
-        </h1>
-        {p.headline && (
-          <p style={{ fontSize: bs + 1, color: clr.mutedColor, margin: '4px 0 0', fontStyle: 'italic' }}>
-            {p.headline}
-          </p>
-        )}
+        </div>
 
-        {/* Contact row */}
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '2px 16px',
-          justifyContent: 'center',
-          marginTop: 8,
-          fontSize: bs - 1,
-          color: clr.mutedColor,
-        }}>
-          {p.phone && (
-            <span>{p.phone}</span>
-          )}
-          {p.email && (
-            <Link url={`mailto:${p.email}`}>{p.email}</Link>
-          )}
+        {/* Address line 1: phone + email */}
+        <div style={{ fontFamily: FONT, fontSize: BASE, color: BLACK, lineHeight: LH }}>
+          {p.phone && <span>{p.phone}</span>}
+          {p.phone && p.email && <span style={{ margin: '0 6px' }}>·</span>}
+          {p.email && <HRef url={`mailto:${p.email}`}>{p.email}</HRef>}
+        </div>
+
+        {/* Address line 2: LinkedIn | Website — Location */}
+        <div style={{ fontFamily: FONT, fontSize: BASE, color: BLACK, lineHeight: LH, marginTop: 1 }}>
+          {p.linkedIn && <HRef url={p.linkedIn}>{p.linkedIn.replace(/^https?:\/\/(www\.)?/i, '')}</HRef>}
+          {p.linkedIn && (p.github || p.portfolio || p.location) && <span style={{ margin: '0 6px' }}>|</span>}
+          {p.github && <HRef url={p.github}>{p.github.replace(/^https?:\/\/(www\.)?/i, '')}</HRef>}
+          {p.github && (p.portfolio || p.location) && <span style={{ margin: '0 6px' }}>|</span>}
+          {p.portfolio && <HRef url={p.portfolio}>{p.portfolio.replace(/^https?:\/\/(www\.)?/i, '')}</HRef>}
+          {p.portfolio && p.location && <span style={{ margin: '0 6px' }}>--</span>}
           {p.location && <span>{p.location}</span>}
-          {p.linkedIn && (
-            <Link url={p.linkedIn}>{p.linkedIn.replace(/^https?:\/\/(www\.)?/i, '')}</Link>
-          )}
-          {p.github && (
-            <Link url={p.github}>{p.github.replace(/^https?:\/\/(www\.)?/i, '')}</Link>
-          )}
-          {p.portfolio && (
-            <Link url={p.portfolio}>{p.portfolio.replace(/^https?:\/\/(www\.)?/i, '')}</Link>
-          )}
         </div>
       </div>
 
       {/* ── Body sections ── */}
-      <div style={{ padding: `${typo.pagePaddingY}px ${typo.pagePaddingX}px` }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: typo.sectionSpacing }}>
-          {visKeys
-            .filter(k => k !== 'personal')
-            .map(k => {
-              const renderer = sectionRenderers[k];
-              if (!renderer) return null;
-              const content = renderer();
-              if (!content) return null;
-              return <div key={k}>{content}</div>;
-            })}
-        </div>
-
-        {/* Page number */}
-        {clr.showPageNumbers && (
-          <div style={{ textAlign: 'right', marginTop: 24, fontSize: bs - 2, color: clr.mutedColor }}>
-            Page 1
-          </div>
-        )}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {visibleSections
+          .filter(s => s.key !== 'personal')
+          .map(section => {
+            const renderer = sectionRenderers[section.key];
+            const content  = renderer ? renderer() : section.isCustom ? renderCustomSection(section) : null;
+            if (!content) return null;
+            return <div key={section.key}>{content}</div>;
+          })}
       </div>
+
     </div>
   );
 }

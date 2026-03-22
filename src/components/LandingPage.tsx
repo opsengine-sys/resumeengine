@@ -5,7 +5,7 @@ import BrandLogo from './BrandLogo';
 import ThemeToggle from './ThemeToggle';
 import { useTheme } from '../context/ThemeContext';
 
-interface Props { onEnterBuilder: () => void; }
+interface Props { onEnterBuilder: (templateId?: string) => void; }
 
 /* ─────────────────────────────────────────────
    In-view hook — re-triggers on enter AND leave
@@ -362,7 +362,7 @@ function Banner({ isDark }: { isDark: boolean }) {
                 transition: 'color 0.2s',
               }}
             >
-              Resume Engine is actively being built.
+              🏗️ Resume Engine is actively being built.
             </button>
 
             {/* Description */}
@@ -574,6 +574,7 @@ const FEATURES = [
 
 const TEMPLATES = [
   {
+    id: 'latex',
     name: 'LaTeX / FAANG', tag: 'ATS Safe', tagColor: '#10B981', tagBg: 'rgba(16,185,129,0.12)',
     svg: (
       <svg viewBox="0 0 160 210" style={{ width: '100%', height: '100%' }}>
@@ -598,6 +599,7 @@ const TEMPLATES = [
     ),
   },
   {
+    id: 'modern-header',
     name: 'Modern', tag: 'Popular', tagColor: '#3b82f6', tagBg: 'rgba(59,130,246,0.12)',
     svg: (
       <svg viewBox="0 0 160 210" style={{ width: '100%', height: '100%' }}>
@@ -618,6 +620,7 @@ const TEMPLATES = [
     ),
   },
   {
+    id: 'sidebar-dark',
     name: 'Executive', tag: 'Two-Column', tagColor: '#8b5cf6', tagBg: 'rgba(139,92,246,0.12)',
     svg: (
       <svg viewBox="0 0 160 210" style={{ width: '100%', height: '100%' }}>
@@ -634,6 +637,7 @@ const TEMPLATES = [
     ),
   },
   {
+    id: 'minimal-line',
     name: 'Minimal', tag: 'Clean', tagColor: '#6b7280', tagBg: 'rgba(107,114,128,0.1)',
     svg: (
       <svg viewBox="0 0 160 210" style={{ width: '100%', height: '100%' }}>
@@ -653,6 +657,7 @@ const TEMPLATES = [
     ),
   },
   {
+    id: 'sidebar-dark',
     name: 'Dark Sidebar', tag: 'Two-Column', tagColor: '#8b5cf6', tagBg: 'rgba(139,92,246,0.12)',
     svg: (
       <svg viewBox="0 0 160 210" style={{ width: '100%', height: '100%' }}>
@@ -673,6 +678,7 @@ const TEMPLATES = [
     ),
   },
   {
+    id: 'timeline',
     name: 'Timeline', tag: 'Creative', tagColor: '#f59e0b', tagBg: 'rgba(245,158,11,0.12)',
     svg: (
       <svg viewBox="0 0 160 210" style={{ width: '100%', height: '100%' }}>
@@ -691,6 +697,7 @@ const TEMPLATES = [
     ),
   },
   {
+    id: 'harvard',
     name: 'Harvard Style', tag: 'Academic', tagColor: '#dc2626', tagBg: 'rgba(220,38,38,0.1)',
     svg: (
       <svg viewBox="0 0 160 210" style={{ width: '100%', height: '100%' }}>
@@ -709,6 +716,7 @@ const TEMPLATES = [
     ),
   },
   {
+    id: 'ats-clean',
     name: 'ATS Safe', tag: 'ATS Friendly', tagColor: '#374151', tagBg: 'rgba(55,65,81,0.1)',
     svg: (
       <svg viewBox="0 0 160 210" style={{ width: '100%', height: '100%' }}>
@@ -725,6 +733,7 @@ const TEMPLATES = [
     ),
   },
   {
+    id: 'infographic',
     name: 'Infographic', tag: 'Visual', tagColor: '#0891b2', tagBg: 'rgba(8,145,178,0.12)',
     svg: (
       <svg viewBox="0 0 160 210" style={{ width: '100%', height: '100%' }}>
@@ -780,7 +789,7 @@ const PRIVACY = [
    Template Carousel — auto-scroll, pause on hover
 ───────────────────────────────────────────── */
 function TemplateCarousel({ templates, isDark, cardBg, cardBdr, text, onEnterBuilder }: {
-  templates: typeof TEMPLATES; isDark: boolean; cardBg: string; cardBdr: string; text: string; onEnterBuilder: () => void;
+  templates: typeof TEMPLATES; isDark: boolean; cardBg: string; cardBdr: string; text: string; onEnterBuilder: (templateId?: string) => void;
 }) {
   const trackRef  = useRef<HTMLDivElement>(null);
   const pausedRef = useRef(false);
@@ -824,7 +833,7 @@ function TemplateCarousel({ templates, isDark, cardBg, cardBdr, text, onEnterBui
         {items.map((tpl, i) => (
           <button
             key={`${tpl.name}-${i}`}
-            onClick={onEnterBuilder}
+            onClick={() => onEnterBuilder(tpl.id)}
             style={{
               flexShrink: 0, width: 220,
               borderRadius: 16, overflow: 'hidden',
@@ -1138,7 +1147,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       </div>
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <p className="text-xs" style={{ color: sub }}>
-          No data is stored or sent to servers. This form will integrate with a backend later.
+          Your email (optional) is only used to respond to your feedback. Nothing else is stored or shared.
         </p>
         <button type="submit" disabled={!areas.length || !issues.length || !detail.trim() || loading}
           className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm text-white transition-all disabled:opacity-40"
@@ -1206,6 +1215,25 @@ export default function LandingPage({ onEnterBuilder }: Props) {
       <ShaderBackground isDark={isDark} />
       {/* Wireframe neural mesh — fixed, full-page */}
       <WireframeCanvas isDark={isDark} />
+
+{/* ── Mobile notice ── */}
+      <div className="md:hidden flex items-center justify-center gap-2 px-4 py-2 relative z-10 flex-shrink-0"
+        style={{
+          background: isDark ? 'rgba(16,185,129,0.07)' : 'rgba(16,185,129,0.06)',
+          borderBottom: `1px solid ${isDark ? 'rgba(52,211,153,0.12)' : 'rgba(16,185,129,0.15)'}`,
+        }}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth={2}
+          style={{ width: 13, height: 13, flexShrink: 0 }}>
+          <rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.01"/>
+        </svg>
+        <p style={{
+          fontSize: 11, color: isDark ? '#6ee7b7' : '#065f46',
+          fontWeight: 500, letterSpacing: '0.01em',
+        }}>
+          For the best experience, open Resume Engine on a{' '}
+          <span style={{ fontWeight: 700, color: '#10B981' }}>desktop browser</span>.
+        </p>
+      </div>
 
       {/* ════════════ NAVBAR ════════════ */}
       <nav

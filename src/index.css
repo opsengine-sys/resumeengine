@@ -377,3 +377,18 @@ input.sidebar-range:focus-visible {
     z-index: 99999 !important;
   }
 }
+@media screen {
+  .resume-section-title {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+}
+h1, h2, h3, h4, h5, h6 {
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+h1 + *, h2 + *, h3 + *, h4 + *, h5 + *, h6 + * {
+  break-before: avoid;
+  page-break-before: avoid;
+}

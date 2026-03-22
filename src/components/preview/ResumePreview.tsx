@@ -30,8 +30,7 @@ export default function ResumePreview({ resume, forExport = false, pageWidth = 7
     return <ModernTemplate resume={resume} template={template} visibleSections={visibleSections} />;
   };
 
-  /* forExport: used by print window — fixed 794px, white bg */
-  if (forExport) {
+if (forExport) {
     return (
       <div
         id="resume-preview-export"
@@ -39,6 +38,7 @@ export default function ResumePreview({ resume, forExport = false, pageWidth = 7
           width: '794px',
           fontFamily: typo.fontFamily,
           backgroundColor: '#ffffff',
+          padding: '18px 20px',
         }}
       >
         {renderTemplate()}
@@ -46,14 +46,13 @@ export default function ResumePreview({ resume, forExport = false, pageWidth = 7
     );
   }
 
-  /* Normal preview: width driven by parent (MultiPagePreview passes pageW) */
   return (
     <div
       style={{
         width:           `${pageWidth}px`,
         fontFamily:      typo.fontFamily,
         backgroundColor: '#ffffff',
-        /* NO transform, NO minHeight — content grows naturally */
+        padding:         '18px 20px',
       }}
     >
       {renderTemplate()}

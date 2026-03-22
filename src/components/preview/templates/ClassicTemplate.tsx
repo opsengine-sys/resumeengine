@@ -78,7 +78,6 @@ export default function ClassicTemplate({ resume, template, visibleSections }: P
   const fullName = `${p.firstName} ${p.lastName}`.trim();
   const bs = typo.baseFontSize;
 
-  /* Custom section renderer */
   const renderCustomSection = (section: SectionConfig) => {
     if (!section.customEntries || section.customEntries.length === 0) return null;
     return (
@@ -397,12 +396,6 @@ export default function ClassicTemplate({ resume, template, visibleSections }: P
         }
         return null;
       })}
-
-      {clr.showPageNumbers && (
-        <div style={{ textAlign: 'right', padding: `4px 0 0`, fontSize: `${bs - 2}px`, color: clr.mutedColor, marginTop: '8px' }}>
-          Page 1
-        </div>
-      )}
     </div>
   );
 }

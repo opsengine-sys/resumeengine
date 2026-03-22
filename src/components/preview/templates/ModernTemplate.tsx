@@ -21,7 +21,6 @@ function toHref(url: string): string {
   return /^https?:\/\//i.test(url) ? url : `https://${url}`;
 }
 
-/* ── Apply element style ── */
 function applyStyle(
   base: React.CSSProperties,
   level: TextLevel,
@@ -38,10 +37,7 @@ function applyStyle(
       ? (base.textTransform ?? 'none')
       : s.letterCase) as React.CSSProperties['textTransform'],
   };
-  // Level fontSize always wins over base if explicitly set
-  if (s.fontSize !== undefined) {
-    result.fontSize = `${s.fontSize}px`;
-  }
+  if (s.fontSize !== undefined) result.fontSize = `${s.fontSize}px`;
   return result;
 }
 
@@ -57,7 +53,6 @@ export default function ModernTemplate({ resume, template, visibleSections }: Pr
   const lvl: Record<TextLevel, ElementStyle> = { ...DEFAULT_LEVEL_STYLES, ...(typo.levelStyles ?? {}) };
   const globalFont = typo.fontFamily;
 
-  /* ── Custom section renderer ── */
   const renderCustomSection = (section: SectionConfig) => {
     const entries = section.customEntries ?? [];
     return (
@@ -99,7 +94,6 @@ export default function ModernTemplate({ resume, template, visibleSections }: Pr
     );
   };
 
-  // Get label from resume.sections so renamed sections display correctly
   const getSectionLabel = (key: string, fallback: string) => {
     return resume.sections.find(s => s.key === key)?.label ?? fallback;
   };
@@ -353,7 +347,6 @@ export default function ModernTemplate({ resume, template, visibleSections }: Pr
       fontFamily: typo.fontFamily, color: textColor, backgroundColor: '#ffffff',
       border: clr.showBorder ? `1.5px solid ${clr.borderColor}` : 'none',
       position: 'relative',
-      // Multi-page: no overflow hidden, no fixed minHeight
     }}>
       {/* Header */}
       <div style={{ backgroundColor: primaryColor, padding: `${typo.headerPaddingY}px ${typo.pagePaddingX}px` }}>
@@ -397,13 +390,11 @@ export default function ModernTemplate({ resume, template, visibleSections }: Pr
       {/* Body */}
       <div style={{ padding: `${typo.pagePaddingY}px ${typo.pagePaddingX}px` }}>
         {visibleSections.filter(s => s.key !== 'personal').map(section => {
-          // Built-in sections
           const renderer = sectionMap[section.key];
           if (renderer) {
             const rendered = renderer();
             return rendered ? <div key={section.key} style={{ marginBottom: `${typo.sectionSpacing}px` }}>{rendered}</div> : null;
           }
-          // Custom sections
           if (section.isCustom) {
             const rendered = renderCustomSection(section);
             return rendered ? <div key={section.key} style={{ marginBottom: `${typo.sectionSpacing}px` }}>{rendered}</div> : null;
@@ -411,16 +402,10 @@ export default function ModernTemplate({ resume, template, visibleSections }: Pr
           return null;
         })}
       </div>
-      {clr.showPageNumbers && (
-        <div style={{ textAlign: 'right', padding: `4px ${typo.pagePaddingX}px 8px`, fontSize: `${bs - 2}px`, color: clr.mutedColor }}>
-          Page 1
-        </div>
-      )}
     </div>
   );
 }
 
-/* ── Section Title ── */
 function SectionTitle({ title, color, typo, lvl, globalFont }: {
   title: string; color: string; typo: TypographySettings;
   lvl: Record<TextLevel, ElementStyle>; globalFont: string;

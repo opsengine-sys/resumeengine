@@ -416,11 +416,15 @@ function LevelStyleEditor({
 }
 
 /* ─── Main Sidebar ────────────────────────────────────────────────── */
-interface Props { onExport: () => void; onGoHome?: () => void; }
+interface Props { onExport: () => void; onGoHome?: () => void; onTabChange?: (tab: SideTab) => void; }
 
-export default function Sidebar({ onExport, onGoHome: _onGoHome }: Props) {
+export default function Sidebar({ onExport, onGoHome: _onGoHome, onTabChange }: Props) {
   const { isDark } = useTheme();
-  const [activeTab, setActiveTab]             = useState<SideTab>('sections');
+  const [activeTab, setActiveTab] = useState<SideTab>('sections');
+  const handleTabChange = (tab: SideTab) => {
+    setActiveTab(tab);
+    onTabChange?.(tab);
+  };
   const [newSectionLabel, setNewSectionLabel] = useState('');
   const [showAddSection, setShowAddSection]   = useState(false);
   const [selectedLevel, setSelectedLevel]     = useState<TextLevel>('candidateName');
@@ -551,7 +555,7 @@ export default function Sidebar({ onExport, onGoHome: _onGoHome }: Props) {
         {TABS.map(tab => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => handleTabChange(tab.id)}
             className="flex flex-col items-center gap-0.5 py-2 text-[9px] font-bold transition-all"
             style={{
               borderBottom: activeTab === tab.id ? `2px solid #10b981` : '2px solid transparent',
@@ -823,7 +827,6 @@ export default function Sidebar({ onExport, onGoHome: _onGoHome }: Props) {
               <p style={{ fontSize:9, fontWeight:700, color: d.textMuted, textTransform:'uppercase', letterSpacing:'0.05em', padding:'8px 4px 0' }}>Page Decoration</p>
               <ToggleRow label="Page Border"   description="Thin border around the resume page" value={colors.showBorder}      onChange={v => uc('showBorder',      v)} isDark={isDark} />
               {colors.showBorder && <ColorRow label="Border Color" value={colors.borderColor} onChange={v => uc('borderColor', v)} isDark={isDark} />}
-              <ToggleRow label="Page Numbers"  description="Show page number at bottom"          value={colors.showPageNumbers} onChange={v => uc('showPageNumbers', v)} isDark={isDark} />
             </div>
           </div>
         )}
