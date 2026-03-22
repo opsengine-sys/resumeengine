@@ -38,7 +38,7 @@ if (forExport) {
           width: '794px',
           fontFamily: typo.fontFamily,
           backgroundColor: '#ffffff',
-          padding: '18px 20px',
+          padding: '12px 15px',
         }}
       >
         {renderTemplate()}
@@ -52,7 +52,7 @@ if (forExport) {
         width:           `${pageWidth}px`,
         fontFamily:      typo.fontFamily,
         backgroundColor: '#ffffff',
-        padding:         '18px 20px',
+        padding:         '5px 8px',
       }}
     >
       {renderTemplate()}
