@@ -1,13 +1,107 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { WorkExperience } from '../../types/resume';
 import { FiPlus, FiTrash2, FiBriefcase, FiChevronDown, FiChevronUp, FiMapPin } from 'react-icons/fi';
 import { v4 as uuidv4 } from 'uuid';
-import { FormField, StyledInput, StyledTextarea, MonthPicker, CheckboxField, ResetButton } from '../ui/SharedUI';
-import { ContentRephraser } from '../ui/AITools';
+import { FormField, StyledInput, StyledTextarea, MonthPicker, CheckboxField, ResetButton, inputStyle } from '../ui/SharedUI';
 
 interface Props {
   experience: WorkExperience[];
   onChange: (data: WorkExperience[]) => void;
+}
+
+function BulletTextarea({
+  value,
+  onChange,
+  onDelete,
+  placeholder,
+  onRephrase,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  onDelete: () => void;
+  placeholder?: string;
+  onRephrase?: (v: string) => void;
+}) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [showRephraser, setShowRephraser] = useState(false);
+  const [rephrased, setRephrased] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.overflow = 'hidden';
+      const newHeight = Math.max(textareaRef.current.scrollHeight, 40);
+      textareaRef.current.style.height = newHeight + 'px';
+    }
+  }, [value]);
+
+  const handleRephrase = async () => {
+    if (!value.trim()) return;
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 600));
+    // Simple rephrase logic - capitalize first letter and add impact
+    const rephrasedText = value.charAt(0).toUpperCase() + value.slice(1);
+    setRephrased(rephrasedText);
+    setLoading(false);
+    setShowRephraser(true);
+  };
+
+  return (
+    <div className="space-y-1">
+      <div className="flex items-start gap-2">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0 mt-1.5" />
+        <textarea
+          ref={textareaRef}
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={placeholder}
+          rows={1}
+          style={{ ...inputStyle, overflow: 'hidden', resize: 'vertical' }}
+          className="flex-1 border border-gray-200 rounded-lg py-2 px-3 text-sm focus:outline-none
+            focus:ring-2 focus:ring-emerald-500 bg-white placeholder-gray-300 resize-y min-h-[40px] max-h-[200px]"
+        />
+        <button
+          onClick={onDelete}
+          className="p-1 text-gray-300 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50 flex-shrink-0 mt-0.5"
+        >
+          <FiTrash2 size={12} />
+        </button>
+      </div>
+      {value.trim().length > 10 && !showRephraser && (
+        <div className="pl-5">
+          <button
+            onClick={handleRephrase}
+            disabled={loading}
+            className="flex items-center gap-1.5 text-[10px] font-medium px-2.5 py-1.5 rounded-lg transition-all disabled:opacity-50"
+            style={{ color: '#8b5cf6', background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)' }}
+          >
+            <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+              <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            {loading ? 'Rephrasing...' : 'Rephrase'}
+          </button>
+        </div>
+      )}
+      {showRephraser && rephrased && (
+        <div className="pl-5 rounded-lg p-2 space-y-1.5 text-xs"
+          style={{ background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.2)' }}>
+          <p style={{ color: 'var(--ui-text)', lineHeight: 1.5 }}>{rephrased}</p>
+          <div className="flex gap-1.5">
+            <button onClick={() => { onChange(rephrased); setShowRephraser(false); setRephrased(''); }}
+              className="text-[9px] font-medium px-2 py-1 rounded bg-violet-600 text-white hover:bg-violet-700">
+              Apply
+            </button>
+            <button onClick={() => { setShowRephraser(false); setRephrased(''); }}
+              className="text-[9px] font-medium px-2 py-1 rounded"
+              style={{ color: 'var(--ui-muted)', border: '1px solid var(--ui-border)' }}>
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function ExperienceItem({ exp, onUpdate, onDelete }: {
@@ -109,33 +203,14 @@ function ExperienceItem({ exp, onUpdate, onDelete }: {
               <ResetButton onClick={() => onUpdate({ ...exp, bullets: [] })} label="Clear bullets" />
             </div>
             {exp.bullets.map((bullet, idx) => (
-              <div key={bullet.id} className="space-y-0.5">
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0 mt-0.5" />
-                  <input
-                    value={bullet.text}
-                    onChange={e => updateBullet(bullet.id, e.target.value)}
-                    placeholder={`Achievement ${idx + 1} — quantify where possible`}
-                    className="flex-1 border border-gray-200 rounded-lg py-2 px-3 text-sm focus:outline-none
-                      focus:ring-2 focus:ring-emerald-500 bg-white placeholder-gray-300"
-                  />
-                  <button
-                    onClick={() => removeBullet(bullet.id)}
-                    className="p-1 text-gray-300 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50 flex-shrink-0"
-                  >
-                    <FiTrash2 size={12} />
-                  </button>
-                </div>
-                {bullet.text.trim().length > 10 && (
-                  <div className="pl-5">
-                    <ContentRephraser
-                      text={bullet.text}
-                      label="Rephrase"
-                      onApply={text => updateBullet(bullet.id, text)}
-                    />
-                  </div>
-                )}
-              </div>
+              <BulletTextarea
+                key={bullet.id}
+                value={bullet.text}
+                onChange={text => updateBullet(bullet.id, text)}
+                onDelete={() => removeBullet(bullet.id)}
+                placeholder={`Achievement ${idx + 1} — quantify where possible`}
+                onRephrase={text => updateBullet(bullet.id, text)}
+              />
             ))}
             <button
               onClick={addBullet}

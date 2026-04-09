@@ -2,7 +2,8 @@
  * SharedUI.tsx — Reusable modern UI primitives (dark-mode aware via CSS vars)
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, ChangeEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { FiChevronDown, FiExternalLink, FiRotateCcw, FiCalendar, FiWind } from 'react-icons/fi';
 
 const I = {
@@ -125,6 +126,16 @@ export function StyledTextarea({
   const [rephrased, setRephrased] = useState('');
   const [loading, setLoading]     = useState(false);
   const [applied, setApplied]     = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.overflow = 'hidden';
+      const newHeight = Math.max(textareaRef.current.scrollHeight, rows * 40);
+      textareaRef.current.style.height = newHeight + 'px';
+    }
+  }, [value]);
 
   const handleRephrase = async () => {
     if (!value.trim()) return;
@@ -143,12 +154,13 @@ export function StyledTextarea({
       {/* Textarea + rephrase trigger */}
       <div className="relative group">
         <textarea
+          ref={textareaRef}
           value={value}
           onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
           rows={rows}
-          style={inputStyle}
-          className={`${I.base} pl-3 pr-16 ${I.input} focus:ring-emerald-500 resize-none`}
+          style={{ ...inputStyle, overflow: 'hidden', resize: 'vertical' }}
+          className={`${I.base} pl-3 pr-16 ${I.input} focus:ring-emerald-500 resize-y min-h-[40px]`}
         />
         {/* Rephrase button — top-right of textarea */}
         <button
@@ -357,7 +369,6 @@ export function MonthPicker({
       </button>
 
       {open && typeof document !== 'undefined' && (() => {
-        const { createPortal } = require('react-dom');
         return createPortal(
           <div
             ref={dropRef}
