@@ -87,7 +87,7 @@ export default function TwoColumnTemplate({ resume, template, visibleSections }:
     return (
       <div style={{ marginBottom: '6px', marginTop: `${typo.sectionSpacing}px` }}>
         <h2 style={{
-          color: primaryColor,
+          color: clr.headingColor,
           fontSize: `${fs}px`,
           fontFamily: s.fontFamily ?? globalFont,
           fontWeight: 700,
@@ -96,7 +96,7 @@ export default function TwoColumnTemplate({ resume, template, visibleSections }:
           letterSpacing: '2px',
           margin: 0,
         }}>{title}</h2>
-        <div style={{ backgroundColor: primaryColor, height: '1.5px', width: '100%', marginTop: '3px' }} />
+        <div style={{ backgroundColor: clr.headingColor, height: '1.5px', width: '100%', marginTop: '3px' }} />
       </div>
     );
   }
@@ -113,12 +113,14 @@ export default function TwoColumnTemplate({ resume, template, visibleSections }:
               {['Technical', 'Tools', 'Soft'].map(cat => {
                 const skills = data.skills.filter(s => s.category === cat);
                 if (!skills.length) return null;
+                const subStyle = lvl.subSectionTitle ?? { fontSize: 9 };
+                const subFs = subStyle.fontSize ?? 9;
                 return (
                   <div key={cat}>
-                    <p style={{ fontSize: `${bs - 2}px`, color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '3px' }}>{cat}</p>
+                    <p style={applyStyle({ fontSize: `${subFs}px`, color: 'rgba(255,255,255,0.55)', letterSpacing: '1px', marginBottom: '3px' }, 'subSectionTitle', lvl, globalFont)}>{cat}</p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
                       {skills.map(s => (
-                        <span key={s.id} style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: 'white', fontSize: `${bs - 2}px`, padding: '1px 6px', borderRadius: '3px' }}>
+                        <span key={s.id} style={applyStyle({ backgroundColor: 'rgba(255,255,255,0.15)', color: 'white', fontSize: `${subFs}px`, padding: '1px 6px', borderRadius: '3px' }, 'bodyText', lvl, globalFont)}>
                           {s.name}
                         </span>
                       ))}
@@ -355,12 +357,11 @@ export default function TwoColumnTemplate({ resume, template, visibleSections }:
 
   return (
     <div style={{
-      fontFamily: typo.fontFamily, color: textColor, backgroundColor: '#ffffff', minHeight: '100%',
-      display: 'flex', flexDirection: 'column',
-      border: clr.showBorder ? `1.5px solid ${clr.borderColor}` : 'none',
+      fontFamily: typo.fontFamily, color: textColor, backgroundColor: clr.backgroundColor || '#ffffff', minHeight: '100%',
+      display: 'flex', flexDirection: 'column'
     }}>
       {/* Header */}
-      <div style={{ backgroundColor: primaryColor, padding: `${typo.headerPaddingY}px ${typo.pagePaddingX}px` }}>
+      <div style={{ backgroundColor: clr.primaryColor || primaryColor, padding: `${typo.headerPaddingY}px ${typo.pagePaddingX}px` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           {p.photo && (
             <img src={p.photo} alt={fullName} style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.4)', flexShrink: 0 }} />
@@ -373,12 +374,12 @@ export default function TwoColumnTemplate({ resume, template, visibleSections }:
           </div>
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px 16px', marginTop: '10px' }}>
-          {p.email    && <a href={`mailto:${p.email}`} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: `${bs - 1}px`, color: 'rgba(255,255,255,0.88)', textDecoration: 'none' }}><FiMail size={bs - 2} />{p.email}</a>}
-          {p.phone    && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: `${bs - 1}px`, color: 'rgba(255,255,255,0.88)' }}><FiPhone size={bs - 2} />{p.phone}</span>}
-          {p.location && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: `${bs - 1}px`, color: 'rgba(255,255,255,0.88)' }}><FiMapPin size={bs - 2} />{p.location}</span>}
-          {p.linkedIn && <a href={toHref(p.linkedIn)} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: `${bs - 1}px`, color: 'rgba(255,255,255,0.88)', textDecoration: 'underline', textUnderlineOffset: '2px' }}><FiLinkedin size={bs - 2} />{p.linkedIn}</a>}
-          {p.github   && <a href={toHref(p.github)} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: `${bs - 1}px`, color: 'rgba(255,255,255,0.88)', textDecoration: 'underline', textUnderlineOffset: '2px' }}><FiGithub size={bs - 2} />{p.github}</a>}
-          {p.portfolio && <a href={toHref(p.portfolio)} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: `${bs - 1}px`, color: 'rgba(255,255,255,0.88)', textDecoration: 'underline', textUnderlineOffset: '2px' }}><FiGlobe size={bs - 2} />{p.portfolio}</a>}
+          {p.email    && <a href={`mailto:${p.email}`} style={applyStyle({ display: 'flex', alignItems: 'center', gap: '4px', fontSize: `${bs - 1}px`, color: 'rgba(255,255,255,0.88)', textDecoration: 'none' }, 'contactInfo', lvl, globalFont)}><FiMail size={(lvl.contactInfo?.fontSize ?? bs) - 2} />{p.email}</a>}
+          {p.phone    && <span style={applyStyle({ display: 'flex', alignItems: 'center', gap: '4px', fontSize: `${bs - 1}px`, color: 'rgba(255,255,255,0.88)' }, 'contactInfo', lvl, globalFont)}><FiPhone size={(lvl.contactInfo?.fontSize ?? bs) - 2} />{p.phone}</span>}
+          {p.location && <span style={applyStyle({ display: 'flex', alignItems: 'center', gap: '4px', fontSize: `${bs - 1}px`, color: 'rgba(255,255,255,0.88)' }, 'contactInfo', lvl, globalFont)}><FiMapPin size={(lvl.contactInfo?.fontSize ?? bs) - 2} />{p.location}</span>}
+          {p.linkedIn && <a href={toHref(p.linkedIn)} target="_blank" rel="noopener noreferrer" style={applyStyle({ display: 'flex', alignItems: 'center', gap: '4px', fontSize: `${bs - 1}px`, color: 'rgba(255,255,255,0.88)', textDecoration: 'underline', textUnderlineOffset: '2px' }, 'contactInfo', lvl, globalFont)}><FiLinkedin size={(lvl.contactInfo?.fontSize ?? bs) - 2} />{p.linkedIn}</a>}
+          {p.github   && <a href={toHref(p.github)} target="_blank" rel="noopener noreferrer" style={applyStyle({ display: 'flex', alignItems: 'center', gap: '4px', fontSize: `${bs - 1}px`, color: 'rgba(255,255,255,0.88)', textDecoration: 'underline', textUnderlineOffset: '2px' }, 'contactInfo', lvl, globalFont)}><FiGithub size={(lvl.contactInfo?.fontSize ?? bs) - 2} />{p.github}</a>}
+          {p.portfolio && <a href={toHref(p.portfolio)} target="_blank" rel="noopener noreferrer" style={applyStyle({ display: 'flex', alignItems: 'center', gap: '4px', fontSize: `${bs - 1}px`, color: 'rgba(255,255,255,0.88)', textDecoration: 'underline', textUnderlineOffset: '2px' }, 'contactInfo', lvl, globalFont)}><FiGlobe size={(lvl.contactInfo?.fontSize ?? bs) - 2} />{p.portfolio}</a>}
         </div>
       </div>
 

@@ -42,11 +42,12 @@ function buildResumeHtml(resume: Resume): string {
   const template  = TEMPLATES.find(t => t.id === resume.templateId) || TEMPLATES[0];
   const typo: TypographySettings = resume.typography;
   const clr: ColorSettings = resume.colors ?? {
+    primaryColor: '#2563eb', backgroundColor: '#ffffff',
     textColor: '#1f2937', headingColor: '#111827', linkColor: '#2563eb',
-    mutedColor: '#6b7280', showBorder: false, borderColor: '#e5e7eb',
-    showPageNumbers: false,
+    mutedColor: '#6b7280', showPageNumbers: false,
   };
-  const { primaryColor } = template;
+  const primaryColor = clr.primaryColor || template.primaryColor;
+  const backgroundColor = clr.backgroundColor || '#ffffff';
   const d: ResumeData = resume.data;
   const p = d.personal;
   const fullName = `${p.firstName} ${p.lastName}`.trim() || 'Your Name';
@@ -363,10 +364,7 @@ function buildResumeHtml(resume: Resume): string {
     .map(k => sections[k]?.() ?? '')
     .join('');
 
-  /* ── Border & page numbers ── */
-  const borderCss = clr.showBorder
-    ? `border: 1.5px solid ${clr.borderColor} !important;`
-    : '';
+  /* ── Page numbers ── */
 
   const pageNumberCss = clr.showPageNumbers ? `
     @page { counter-increment: page; }
@@ -396,7 +394,7 @@ function buildResumeHtml(resume: Resume): string {
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
-      background: #ffffff;
+      background: ${backgroundColor};
       font-family: ${typo.fontFamily}, sans-serif;
       font-size: ${bs}px;
       line-height: ${typo.lineHeight};
@@ -431,12 +429,11 @@ function buildResumeHtml(resume: Resume): string {
       #resume-page {
         width: 210mm;
         min-height: 297mm;
-        background: white;
+        background: ${backgroundColor};
         box-shadow: 0 4px 32px rgba(0,0,0,0.18);
         border-radius: 2px;
         overflow: visible;
         position: relative;
-        ${borderCss}
       }
     }
 
@@ -449,7 +446,7 @@ function buildResumeHtml(resume: Resume): string {
       html, body {
         margin: 0 !important;
         padding: 0 !important;
-        background: white !important;
+        background: ${backgroundColor} !important;
         display: block !important;
         width: 210mm !important;
       }
@@ -462,7 +459,6 @@ function buildResumeHtml(resume: Resume): string {
         box-shadow: none !important;
         border-radius: 0 !important;
         overflow: visible !important;
-        ${borderCss}
       }
       /* Only avoid breaks inside small atomic items — NOT every div */
       li, tr, .no-break {

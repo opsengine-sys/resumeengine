@@ -5,6 +5,7 @@ export const DEFAULT_LEVEL_STYLES: Record<TextLevel, ElementStyle> = {
   headline:        { fontFamily: 'inherit', fontSize: 14, fontWeight: 'normal', letterCase: 'normal',    isItalic: true  },
   contactInfo:     { fontFamily: 'inherit', fontSize: 10, fontWeight: 'normal', letterCase: 'normal',    isItalic: false },
   sectionTitle:    { fontFamily: 'inherit', fontSize: 14, fontWeight: 'bold',   letterCase: 'uppercase', isItalic: false },
+  subSectionTitle: { fontFamily: 'inherit', fontSize: 9,  fontWeight: 'bold',   letterCase: 'uppercase', isItalic: false },
   jobTitle:        { fontFamily: 'inherit', fontSize: 12, fontWeight: 'bold',   letterCase: 'normal',    isItalic: false },
   companyName:     { fontFamily: 'inherit', fontSize: 12, fontWeight: 'normal', letterCase: 'normal',    isItalic: false },
   institutionName: { fontFamily: 'inherit', fontSize: 12, fontWeight: 'normal', letterCase: 'normal',    isItalic: false },
@@ -306,12 +307,12 @@ export const DEFAULT_TYPOGRAPHY: TypographySettings = {
   levelStyles: JSON.parse(JSON.stringify(DEFAULT_LEVEL_STYLES)),
 };
 export const DEFAULT_COLORS: ColorSettings = {
+  primaryColor: '#2563eb',
+  backgroundColor: '#ffffff',
   textColor: '#1f2937',
   headingColor: '#111827',
   linkColor: '#2563eb',
   mutedColor: '#6b7280',
-  showBorder: false,
-  borderColor: '#e5e7eb',
   showPageNumbers: false,
 };
 export function createNewResume(name: string = 'My Resume'): Resume {

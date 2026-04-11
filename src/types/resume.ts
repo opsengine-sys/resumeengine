@@ -203,6 +203,7 @@ export type TextLevel =
   | 'headline'
   | 'contactInfo'
   | 'sectionTitle'
+  | 'subSectionTitle'
   | 'jobTitle'
   | 'companyName'
   | 'institutionName'
@@ -210,12 +211,12 @@ export type TextLevel =
   | 'bodyText';
 
 export interface ColorSettings {
+  primaryColor: string;       // main accent/accent-background component
+  backgroundColor: string;    // page background (for modern template left column)
   textColor: string;          // body text color
   headingColor: string;       // section headings color
   linkColor: string;          // URL / link color
   mutedColor: string;         // dates, subtitles
-  showBorder: boolean;        // page border toggle
-  borderColor: string;        // border color if showBorder
   showPageNumbers: boolean;   // page number footer toggle
 }
 

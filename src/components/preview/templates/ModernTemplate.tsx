@@ -57,7 +57,7 @@ export default function ModernTemplate({ resume, template, visibleSections }: Pr
     const entries = section.customEntries ?? [];
     return (
       <>
-        <SectionTitle title={section.label} color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title={section.label} color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         {entries.length === 0 ? (
           <p style={{ fontSize: `${bs - 1}px`, color: clr.mutedColor, fontStyle: 'italic' }}>
             Add entries in the editor panel →
@@ -101,7 +101,7 @@ export default function ModernTemplate({ resume, template, visibleSections }: Pr
   const sectionMap: Record<string, () => React.ReactNode> = {
     summary: () => data.summary ? (
       <>
-        <SectionTitle title={getSectionLabel('summary', 'Professional Summary')} color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title={getSectionLabel('summary', 'Professional Summary')} color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         <p style={applyStyle({ color: textColor, fontSize: `${bs}px`, lineHeight: typo.lineHeight }, 'bodyText', lvl, globalFont)}>
           {data.summary}
         </p>
@@ -110,7 +110,7 @@ export default function ModernTemplate({ resume, template, visibleSections }: Pr
 
     experience: () => data.experience.length > 0 ? (
       <>
-        <SectionTitle title={getSectionLabel('experience', 'Work Experience')} color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title={getSectionLabel('experience', 'Work Experience')} color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: `${typo.itemSpacing}px` }}>
           {data.experience.map(exp => (
             <div key={exp.id}>
@@ -150,7 +150,7 @@ export default function ModernTemplate({ resume, template, visibleSections }: Pr
 
     education: () => data.education.length > 0 ? (
       <>
-        <SectionTitle title={getSectionLabel('education', 'Education')} color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title={getSectionLabel('education', 'Education')} color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: `${typo.itemSpacing}px` }}>
           {data.education.map(edu => (
             <div key={edu.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -174,7 +174,7 @@ export default function ModernTemplate({ resume, template, visibleSections }: Pr
 
     skills: () => data.skills.length > 0 ? (
       <>
-        <SectionTitle title={getSectionLabel('skills', 'Skills')} color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title={getSectionLabel('skills', 'Skills')} color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
           {data.skills.map(skill => (
             <span key={skill.id} style={applyStyle({
@@ -195,7 +195,7 @@ export default function ModernTemplate({ resume, template, visibleSections }: Pr
 
     projects: () => data.projects.length > 0 ? (
       <>
-        <SectionTitle title={getSectionLabel('projects', 'Projects')} color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title={getSectionLabel('projects', 'Projects')} color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: `${typo.itemSpacing}px` }}>
           {data.projects.map(proj => (
             <div key={proj.id}>
@@ -226,7 +226,7 @@ export default function ModernTemplate({ resume, template, visibleSections }: Pr
 
     certifications: () => data.certifications.length > 0 ? (
       <>
-        <SectionTitle title={getSectionLabel('certifications', 'Certifications')} color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title={getSectionLabel('certifications', 'Certifications')} color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: `${typo.itemSpacing * 0.7}px` }}>
           {data.certifications.map(c => (
             <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -251,7 +251,7 @@ export default function ModernTemplate({ resume, template, visibleSections }: Pr
 
     achievements: () => data.achievements.length > 0 ? (
       <>
-        <SectionTitle title={getSectionLabel('achievements', 'Achievements & Awards')} color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title={getSectionLabel('achievements', 'Achievements & Awards')} color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: `${typo.itemSpacing * 0.7}px` }}>
           {data.achievements.map(a => (
             <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -269,7 +269,7 @@ export default function ModernTemplate({ resume, template, visibleSections }: Pr
 
     languages: () => data.languages.length > 0 ? (
       <>
-        <SectionTitle title={getSectionLabel('languages', 'Languages')} color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title={getSectionLabel('languages', 'Languages')} color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
           {data.languages.map(lang => (
             <div key={lang.id}>
@@ -289,7 +289,7 @@ export default function ModernTemplate({ resume, template, visibleSections }: Pr
 
     volunteer: () => data.volunteer.length > 0 ? (
       <>
-        <SectionTitle title={getSectionLabel('volunteer', 'Volunteer Experience')} color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title={getSectionLabel('volunteer', 'Volunteer Experience')} color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: `${typo.itemSpacing}px` }}>
           {data.volunteer.map(v => (
             <div key={v.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -309,7 +309,7 @@ export default function ModernTemplate({ resume, template, visibleSections }: Pr
 
     publications: () => data.publications.length > 0 ? (
       <>
-        <SectionTitle title={getSectionLabel('publications', 'Publications')} color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title={getSectionLabel('publications', 'Publications')} color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: `${typo.itemSpacing * 0.7}px` }}>
           {data.publications.map(pub => (
             <div key={pub.id}>
@@ -327,7 +327,7 @@ export default function ModernTemplate({ resume, template, visibleSections }: Pr
 
     references: () => data.references.length > 0 ? (
       <>
-        <SectionTitle title={getSectionLabel('references', 'References')} color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title={getSectionLabel('references', 'References')} color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           {data.references.map(ref => (
             <div key={ref.id}>
@@ -344,12 +344,11 @@ export default function ModernTemplate({ resume, template, visibleSections }: Pr
 
   return (
     <div style={{
-      fontFamily: typo.fontFamily, color: textColor, backgroundColor: '#ffffff',
-      border: clr.showBorder ? `1.5px solid ${clr.borderColor}` : 'none',
+      fontFamily: typo.fontFamily, color: textColor, backgroundColor: clr.backgroundColor || '#ffffff',
       position: 'relative',
     }}>
       {/* Header */}
-      <div style={{ backgroundColor: primaryColor, padding: `${typo.headerPaddingY}px ${typo.pagePaddingX}px` }}>
+      <div style={{ backgroundColor: clr.primaryColor || primaryColor, padding: `${typo.headerPaddingY}px ${typo.pagePaddingX}px` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           {p.photo && (
             <img src={p.photo} alt={fullName} style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.3)', flexShrink: 0 }} />

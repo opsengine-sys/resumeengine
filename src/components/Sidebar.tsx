@@ -7,7 +7,7 @@ import {
   FiUser, FiFileText, FiBriefcase, FiBook, FiStar, FiCode,
   FiAward, FiTrendingUp, FiGlobe, FiHeart, FiBookOpen, FiUsers,
   FiMenu, FiEye, FiEyeOff, FiLayout, FiPlus, FiPrinter, FiType,
-  FiList, FiCheck, FiDroplet, FiRotateCcw, FiEdit2, FiTrash2, FiCopy,
+  FiList, FiCheck, FiRotateCcw, FiEdit2, FiTrash2, FiCopy,
   FiChevronDown,
 } from 'react-icons/fi';
 import {
@@ -113,7 +113,7 @@ function SortableSection({ section, isActive, onClick, onToggle, onRename, onRem
 }
 
 /* ─── Tab type ────────────────────────────────────────────────────── */
-type SideTab = 'sections' | 'templates' | 'typography' | 'colors';
+type SideTab = 'sections' | 'templates' | 'typography';
 
 /* ─── Template swatch SVG ─────────────────────────────────────────── */
 function TemplateSwatch({ t }: { t: Template }) {
@@ -216,29 +216,6 @@ function ColorRow({ label, value, onChange, isDark }: { label: string; value: st
   );
 }
 
-/* ─── Toggle row ──────────────────────────────────────────────────── */
-function ToggleRow({ label, description, value, onChange, isDark }: {
-  label: string; description?: string; value: boolean; onChange: (v: boolean) => void; isDark?: boolean;
-}) {
-  const bg   = isDark ? '#161b22' : '#f9fafb';
-  const text = isDark ? '#c9d1d9' : '#374151';
-  const muted = isDark ? '#8b949e' : '#9ca3af';
-  return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', background: bg, borderRadius:12, padding:'8px 12px', gap:12 }}>
-      <div style={{ minWidth:0 }}>
-        <p style={{ fontSize:11, fontWeight:600, color: text, lineHeight:1.3 }}>{label}</p>
-        {description && <p style={{ fontSize:10, color: muted, lineHeight:1.3, marginTop:2 }}>{description}</p>}
-      </div>
-      <button
-        role="switch" aria-checked={value} onClick={() => onChange(!value)}
-        style={{ position:'relative', flexShrink:0, width:40, height:20, borderRadius:10, background: value?'#10b981':(isDark?'#374151':'#d1d5db'), border:'none', cursor:'pointer', transition:'background 0.2s' }}
-      >
-        <span style={{ position:'absolute', top:2, left:2, width:16, height:16, background:'#fff', borderRadius:8, boxShadow:'0 1px 3px rgba(0,0,0,0.3)', transition:'transform 0.2s', transform: value?'translateX(20px)':'translateX(0)' }} />
-      </button>
-    </div>
-  );
-}
-
 /* ─── Logo (kept for reference, inlined in header) ──────────────── */
 
 /* ─── Text Level definitions ──────────────────────────────────────── */
@@ -247,6 +224,7 @@ const TEXT_LEVELS: { key: TextLevel; label: string; desc: string; defaultSize: n
   { key: 'headline',        label: 'Headline / Tagline', desc: 'Professional title below name',         defaultSize: 12 },
   { key: 'contactInfo',     label: 'Contact Info',       desc: 'Email, location, LinkedIn, URLs',       defaultSize: 10 },
   { key: 'sectionTitle',    label: 'Section Titles',     desc: 'WORK EXPERIENCE, EDUCATION, etc.',      defaultSize: 13 },
+  { key: 'subSectionTitle', label: 'Sub-Section Titles', desc: 'Technical, Tools, Soft in Skills, etc.', defaultSize: 9  },
   { key: 'jobTitle',        label: 'Job Title / Degree', desc: 'Role name or degree title',             defaultSize: 12 },
   { key: 'companyName',     label: 'Company / Org Name', desc: 'Employer or institution',               defaultSize: 11 },
   { key: 'institutionName', label: 'Institution',        desc: 'University or school name',             defaultSize: 11 },
@@ -481,7 +459,6 @@ export default function Sidebar({ onExport, onGoHome: _onGoHome, onTabChange }: 
     { id: 'sections',   icon: <FiList    size={12} />, label: 'Sections'  },
     { id: 'templates',  icon: <FiLayout  size={12} />, label: 'Templates' },
     { id: 'typography', icon: <FiType    size={12} />, label: 'Style'     },
-    { id: 'colors',     icon: <FiDroplet size={12} />, label: 'Colors'    },
   ];
 
   // ── Dark mode tokens ────────────────────────────────────────────
@@ -551,7 +528,7 @@ export default function Sidebar({ onExport, onGoHome: _onGoHome, onTabChange }: 
       </div>
 
       {/* ── Top Tab Bar ──────────────────────────────────────── */}
-      <div className="grid grid-cols-4 flex-shrink-0" style={{ borderBottom: `1px solid ${d.border}` }}>
+      <div className="grid grid-cols-3 flex-shrink-0" style={{ borderBottom: `1px solid ${d.border}` }}>
         {TABS.map(tab => (
           <button
             key={tab.id}
@@ -804,29 +781,26 @@ export default function Sidebar({ onExport, onGoHome: _onGoHome, onTabChange }: 
                   onReset={() => ut('headerPaddingY', DEFAULT_TYPOGRAPHY.headerPaddingY)} defaultVal={DEFAULT_TYPOGRAPHY.headerPaddingY} />
               </div>
             </div>
-          </div>
-        )}
-
-        {/* ══ COLORS tab ═════════════════════════════════════ */}
-        {activeTab === 'colors' && (
-          <div className="p-3 pb-8">
-            <div className="flex items-center justify-between mb-3 px-1 pt-2">
-              <p style={{ fontSize:9, fontWeight:700, color: d.textFaint, textTransform:'uppercase', letterSpacing:'0.1em' }}>Colors</p>
-              <button onClick={() => updateColors({ ...DEFAULT_COLORS })}
-                className="flex items-center gap-1 px-2 py-1 rounded-lg transition-colors"
-                style={{ fontSize:10, fontWeight:600, color: d.textMuted }}
-                onMouseEnter={e => e.currentTarget.style.color='#ef4444'} onMouseLeave={e => e.currentTarget.style.color=d.textMuted}
-              ><FiRotateCcw size={9} /> Reset All</button>
-            </div>
-            <div className="space-y-2">
-              <p style={{ fontSize:9, fontWeight:700, color: d.textMuted, textTransform:'uppercase', letterSpacing:'0.05em', padding:'4px 4px 0' }}>Text Colors</p>
-              <ColorRow label="Body Text"     value={colors.textColor}    onChange={v => uc('textColor',    v)} isDark={isDark} />
-              <ColorRow label="Headings"      value={colors.headingColor} onChange={v => uc('headingColor', v)} isDark={isDark} />
-              <ColorRow label="Muted / Dates" value={colors.mutedColor}   onChange={v => uc('mutedColor',   v)} isDark={isDark} />
-              <ColorRow label="Links / URLs"  value={colors.linkColor}    onChange={v => uc('linkColor',    v)} isDark={isDark} />
-              <p style={{ fontSize:9, fontWeight:700, color: d.textMuted, textTransform:'uppercase', letterSpacing:'0.05em', padding:'8px 4px 0' }}>Page Decoration</p>
-              <ToggleRow label="Page Border"   description="Thin border around the resume page" value={colors.showBorder}      onChange={v => uc('showBorder',      v)} isDark={isDark} />
-              {colors.showBorder && <ColorRow label="Border Color" value={colors.borderColor} onChange={v => uc('borderColor', v)} isDark={isDark} />}
+            {/* ── Colors (merged into Style tab) ── */}
+            <div className="rounded-xl p-3 mb-3" style={{ background: d.bgSecondary, border:`1px solid ${d.border}` }}>
+              <div className="flex items-center justify-between mb-2">
+                <p style={{ fontSize:11, fontWeight:700, color: d.text }}>Colors</p>
+                <button onClick={() => updateColors({ ...DEFAULT_COLORS })}
+                  className="flex items-center gap-1 transition-colors"
+                  style={{ fontSize:9, fontWeight:600, color: d.textMuted }}
+                  onMouseEnter={e => e.currentTarget.style.color='#f97316'} onMouseLeave={e => e.currentTarget.style.color=d.textMuted}
+                ><FiRotateCcw size={8} /> Reset</button>
+              </div>
+              <div className="space-y-2">
+                <p style={{ fontSize:9, fontWeight:700, color: d.textMuted, textTransform:'uppercase', letterSpacing:'0.05em', padding:'4px 4px 0' }}>Template Theme</p>
+                <ColorRow label="Primary Accent" value={colors.primaryColor || '#2563eb'} onChange={v => uc('primaryColor', v)} isDark={isDark} />
+                <ColorRow label="Background"   value={colors.backgroundColor || '#ffffff'} onChange={v => uc('backgroundColor', v)} isDark={isDark} />
+                <p style={{ fontSize:9, fontWeight:700, color: d.textMuted, textTransform:'uppercase', letterSpacing:'0.05em', padding:'8px 4px 0' }}>Text Colors</p>
+                <ColorRow label="Body Text"     value={colors.textColor}    onChange={v => uc('textColor',    v)} isDark={isDark} />
+                <ColorRow label="Headings"      value={colors.headingColor} onChange={v => uc('headingColor', v)} isDark={isDark} />
+                <ColorRow label="Muted / Dates" value={colors.mutedColor}   onChange={v => uc('mutedColor',   v)} isDark={isDark} />
+                <ColorRow label="Links / URLs"  value={colors.linkColor}    onChange={v => uc('linkColor',    v)} isDark={isDark} />
+              </div>
             </div>
           </div>
         )}

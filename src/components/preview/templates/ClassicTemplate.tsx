@@ -82,7 +82,7 @@ export default function ClassicTemplate({ resume, template, visibleSections }: P
     if (!section.customEntries || section.customEntries.length === 0) return null;
     return (
       <>
-        <SectionTitle title={section.label} color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title={section.label} color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: `${typo.itemSpacing}px` }}>
           {section.customEntries.map(entry => (
             <div key={entry.id} style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 16px' }}>
@@ -106,7 +106,7 @@ export default function ClassicTemplate({ resume, template, visibleSections }: P
   const sectionMap: Record<string, () => React.ReactNode> = {
     summary: () => data.summary ? (
       <>
-        <SectionTitle title="Professional Summary" color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title="Professional Summary" color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         <p style={applyStyle({ color: textColor, fontSize: `${bs}px`, lineHeight: typo.lineHeight, fontStyle: 'italic' }, 'bodyText', lvl, globalFont)}>
           {data.summary}
         </p>
@@ -115,7 +115,7 @@ export default function ClassicTemplate({ resume, template, visibleSections }: P
 
     experience: () => data.experience.length > 0 ? (
       <>
-        <SectionTitle title="Professional Experience" color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title="Professional Experience" color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: `${typo.itemSpacing}px` }}>
           {data.experience.map(exp => (
             <div key={exp.id}>
@@ -146,7 +146,7 @@ export default function ClassicTemplate({ resume, template, visibleSections }: P
 
     education: () => data.education.length > 0 ? (
       <>
-        <SectionTitle title="Education" color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title="Education" color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: `${typo.itemSpacing}px` }}>
           {data.education.map(edu => (
             <div key={edu.id}>
@@ -170,13 +170,13 @@ export default function ClassicTemplate({ resume, template, visibleSections }: P
 
     skills: () => data.skills.length > 0 ? (
       <>
-        <SectionTitle title="Skills" color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title="Skills" color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         {['Technical', 'Tools', 'Soft', 'Other'].map(cat => {
           const catSkills = data.skills.filter(s => s.category === cat);
           if (!catSkills.length) return null;
           return (
             <div key={cat} style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
-              <span style={{ color: primaryColor, fontSize: `${bs}px`, fontWeight: 700, minWidth: '64px' }}>{cat}:</span>
+              <span style={applyStyle({ color: primaryColor, fontSize: `${bs}px`, fontWeight: 700, minWidth: '64px' }, 'subSectionTitle', lvl, globalFont)}>{cat}:</span>
               <span style={applyStyle({ fontSize: `${bs}px`, color: '#374151' }, 'bodyText', lvl, globalFont)}>{catSkills.map(s => s.name).join(' • ')}</span>
             </div>
           );
@@ -186,7 +186,7 @@ export default function ClassicTemplate({ resume, template, visibleSections }: P
 
     projects: () => data.projects.length > 0 ? (
       <>
-        <SectionTitle title="Projects" color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title="Projects" color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: `${typo.itemSpacing}px` }}>
           {data.projects.map(proj => (
             <div key={proj.id}>
@@ -217,7 +217,7 @@ export default function ClassicTemplate({ resume, template, visibleSections }: P
 
     certifications: () => data.certifications.length > 0 ? (
       <>
-        <SectionTitle title="Certifications" color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title="Certifications" color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: `${typo.itemSpacing * 0.6}px` }}>
           {data.certifications.map(c => (
             <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -240,7 +240,7 @@ export default function ClassicTemplate({ resume, template, visibleSections }: P
 
     achievements: () => data.achievements.length > 0 ? (
       <>
-        <SectionTitle title="Achievements & Awards" color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title="Achievements & Awards" color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: `${typo.itemSpacing * 0.7}px` }}>
           {data.achievements.map(a => (
             <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -258,7 +258,7 @@ export default function ClassicTemplate({ resume, template, visibleSections }: P
 
     languages: () => data.languages.length > 0 ? (
       <>
-        <SectionTitle title="Languages" color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title="Languages" color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
           {data.languages.map(lang => (
             <span key={lang.id} style={{ fontSize: `${bs + 1}px` }}>
@@ -272,7 +272,7 @@ export default function ClassicTemplate({ resume, template, visibleSections }: P
 
     volunteer: () => data.volunteer.length > 0 ? (
       <>
-        <SectionTitle title="Volunteer Experience" color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title="Volunteer Experience" color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: `${typo.itemSpacing * 0.7}px` }}>
           {data.volunteer.map(v => (
             <div key={v.id}>
@@ -291,7 +291,7 @@ export default function ClassicTemplate({ resume, template, visibleSections }: P
 
     publications: () => data.publications.length > 0 ? (
       <>
-        <SectionTitle title="Publications" color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title="Publications" color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         {data.publications.map(pub => (
           <div key={pub.id} style={{ marginBottom: `${typo.itemSpacing * 0.6}px` }}>
             <p style={applyStyle({ color: textColor, fontSize: `${bs + 1}px`, fontWeight: 700 }, 'jobTitle', lvl, globalFont)}>
@@ -308,7 +308,7 @@ export default function ClassicTemplate({ resume, template, visibleSections }: P
 
     references: () => data.references.length > 0 ? (
       <>
-        <SectionTitle title="References" color={primaryColor} typo={typo} lvl={lvl} globalFont={globalFont} />
+        <SectionTitle title="References" color={clr.headingColor} typo={typo} lvl={lvl} globalFont={globalFont} />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           {data.references.map(ref => (
             <div key={ref.id}>
@@ -332,17 +332,16 @@ export default function ClassicTemplate({ resume, template, visibleSections }: P
     <div style={{
       fontFamily: typo.fontFamily,
       color: textColor,
-      backgroundColor: '#ffffff',
+      backgroundColor: clr.backgroundColor || '#ffffff',
       minHeight: '100%',
-      padding: `${typo.pagePaddingY}px ${typo.pagePaddingX}px`,
-      border: clr.showBorder ? `1.5px solid ${clr.borderColor}` : 'none',
+      padding: `${typo.pagePaddingY}px ${typo.pagePaddingX}px`
     }}>
       {/* Classic centered header */}
       <div style={{ textAlign: 'center', marginBottom: `${typo.headerPaddingY * 0.5}px` }}>
         {p.photo && (
-          <img src={p.photo} alt={fullName} style={{ width: '72px', height: '72px', borderRadius: '50%', objectFit: 'cover', margin: '0 auto 8px', border: `2px solid ${primaryColor}` }} />
+          <img src={p.photo} alt={fullName} style={{ width: '72px', height: '72px', borderRadius: '50%', objectFit: 'cover', margin: '0 auto 8px', border: `2px solid ${clr.primaryColor || primaryColor}` }} />
         )}
-        <h1 style={applyStyle({ color: primaryColor, fontSize: `${typo.nameFontSize}px`, letterSpacing: '0.05em', fontWeight: 700 }, 'candidateName', lvl, globalFont)}>
+        <h1 style={applyStyle({ color: clr.primaryColor || primaryColor, fontSize: `${typo.nameFontSize}px`, letterSpacing: '0.05em', fontWeight: 700 }, 'candidateName', lvl, globalFont)}>
           {fullName || 'Your Name'}
         </h1>
         {p.headline && (
@@ -351,33 +350,33 @@ export default function ClassicTemplate({ resume, template, visibleSections }: P
         <div style={{ backgroundColor: primaryColor, height: '2px', width: '96px', margin: '8px auto' }} />
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '4px 16px', marginTop: '8px' }}>
           {p.email && (
-            <a href={`mailto:${p.email}`} style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: `${bs - 1}px`, color: '#4b5563', textDecoration: 'none' }}>
-              <FiMail size={bs - 2} />{p.email}
+            <a href={`mailto:${p.email}`} style={applyStyle({ display: 'flex', alignItems: 'center', gap: '3px', fontSize: `${bs - 1}px`, color: '#4b5563', textDecoration: 'none' }, 'contactInfo', lvl, globalFont)}>
+              <FiMail size={(lvl.contactInfo?.fontSize ?? bs) - 2} />{p.email}
             </a>
           )}
           {p.phone && (
-            <span style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: `${bs - 1}px`, color: '#4b5563' }}>
-              <FiPhone size={bs - 2} />{p.phone}
+            <span style={applyStyle({ display: 'flex', alignItems: 'center', gap: '3px', fontSize: `${bs - 1}px`, color: '#4b5563' }, 'contactInfo', lvl, globalFont)}>
+              <FiPhone size={(lvl.contactInfo?.fontSize ?? bs) - 2} />{p.phone}
             </span>
           )}
           {p.location && (
-            <span style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: `${bs - 1}px`, color: '#4b5563' }}>
-              <FiMapPin size={bs - 2} />{p.location}
+            <span style={applyStyle({ display: 'flex', alignItems: 'center', gap: '3px', fontSize: `${bs - 1}px`, color: '#4b5563' }, 'contactInfo', lvl, globalFont)}>
+              <FiMapPin size={(lvl.contactInfo?.fontSize ?? bs) - 2} />{p.location}
             </span>
           )}
           {p.linkedIn && (
-            <a href={toHref(p.linkedIn)} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: `${bs - 1}px`, color: primaryColor, textDecoration: 'underline', textUnderlineOffset: '2px' }}>
-              <FiLinkedin size={bs - 2} />{p.linkedIn}
+            <a href={toHref(p.linkedIn)} target="_blank" rel="noopener noreferrer" style={applyStyle({ display: 'flex', alignItems: 'center', gap: '3px', fontSize: `${bs - 1}px`, color: primaryColor, textDecoration: 'underline', textUnderlineOffset: '2px' }, 'contactInfo', lvl, globalFont)}>
+              <FiLinkedin size={(lvl.contactInfo?.fontSize ?? bs) - 2} />{p.linkedIn}
             </a>
           )}
           {p.github && (
-            <a href={toHref(p.github)} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: `${bs - 1}px`, color: primaryColor, textDecoration: 'underline', textUnderlineOffset: '2px' }}>
-              <FiGithub size={bs - 2} />{p.github}
+            <a href={toHref(p.github)} target="_blank" rel="noopener noreferrer" style={applyStyle({ display: 'flex', alignItems: 'center', gap: '3px', fontSize: `${bs - 1}px`, color: primaryColor, textDecoration: 'underline', textUnderlineOffset: '2px' }, 'contactInfo', lvl, globalFont)}>
+              <FiGithub size={(lvl.contactInfo?.fontSize ?? bs) - 2} />{p.github}
             </a>
           )}
           {p.portfolio && (
-            <a href={toHref(p.portfolio)} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: `${bs - 1}px`, color: primaryColor, textDecoration: 'underline', textUnderlineOffset: '2px' }}>
-              <FiGlobe size={bs - 2} />{p.portfolio}
+            <a href={toHref(p.portfolio)} target="_blank" rel="noopener noreferrer" style={applyStyle({ display: 'flex', alignItems: 'center', gap: '3px', fontSize: `${bs - 1}px`, color: primaryColor, textDecoration: 'underline', textUnderlineOffset: '2px' }, 'contactInfo', lvl, globalFont)}>
+              <FiGlobe size={(lvl.contactInfo?.fontSize ?? bs) - 2} />{p.portfolio}
             </a>
           )}
         </div>
